@@ -1,1 +1,1 @@
-/Users/mac/Desktop/notebooks/bookbot/ml/icefall/egs/timit/ASR/tdnn_lstm_ctc/model.py
+../../../timit/ASR/tdnn_ligru_ctc/model.py
