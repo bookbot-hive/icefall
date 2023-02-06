@@ -101,7 +101,6 @@ def compile_HLG(lang_dir: str) -> k2.Fsa:
     logging.info("Removing disambiguation symbols on LG")
 
     LG.labels[LG.labels >= first_token_disambig_id] = 0
-
     LG.aux_labels.values[LG.aux_labels.values >= first_word_disambig_id] = 0
 
     LG = k2.remove_epsilon(LG)
