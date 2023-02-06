@@ -1,0 +1,1 @@
+/Users/mac/Desktop/notebooks/bookbot/ml/icefall/egs/timit/ASR/tdnn_lstm_ctc/pretrained.py
