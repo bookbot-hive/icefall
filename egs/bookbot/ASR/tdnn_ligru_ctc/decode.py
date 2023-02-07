@@ -422,8 +422,8 @@ def main():
                 # See https://github.com/k2-fsa/k2/issues/874
                 # for why we need to set G.properties to None
                 G.__dict__["_properties"] = None
-                G = k2.Fsa.from_fsas([G]).to(device)
                 G = k2.arc_sort(G)
+                G = k2.Fsa.from_fsas([G]).to(device)
                 torch.save(G.as_dict(), params.lm_dir / "G_4_gram.pt")
         else:
             logging.info("Loading pre-compiled G_4_gram.pt")
