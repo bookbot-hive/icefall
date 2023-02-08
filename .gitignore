@@ -11,6 +11,7 @@ log
 *.bak
 *-bak
 *bak.py
+tmp
 
 # Ignore Mac system files
 .DS_store
