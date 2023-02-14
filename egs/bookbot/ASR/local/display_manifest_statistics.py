@@ -29,7 +29,7 @@ from lhotse import load_manifest_lazy
 
 
 def main():
-    path = "./data/fbank/train.jsonl.gz"
+    path = "./data/fbank/bookbot_cuts_train.jsonl.gz"
 
     cuts = load_manifest_lazy(path)
     cuts.describe()
