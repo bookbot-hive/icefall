@@ -71,6 +71,7 @@ from asr_datamodule import BookbotAsrDataModule
 from decoder import Decoder
 from emformer import Emformer
 from joiner import Joiner
+from lhotse.cut import Cut
 from lhotse.dataset.sampling.base import CutSampler
 from lhotse.utils import fix_random_seed
 from model import Transducer
@@ -965,7 +966,23 @@ def run(rank, world_size, args):
         diagnostic = diagnostics.attach_diagnostics(model, opts)
 
     bookbot = BookbotAsrDataModule(args)
-    train_dl = bookbot.train_dataloaders()
+
+    train_cuts = bookbot.train_cuts()
+
+    def remove_short_and_long_utt(c: Cut):
+        # Keep only utterances with duration between 0.2 second and 25 seconds
+        #
+        # Caution: There is a reason to select 20.0 here. Please see
+        # ../local/display_manifest_statistics.py
+        #
+        # You should use ../local/display_manifest_statistics.py to get
+        # an utterance duration distribution for your dataset to select
+        # the threshold
+        return 0.2 <= c.duration <= 25.0
+
+    train_cuts = train_cuts.filter(remove_short_and_long_utt)
+    train_dl = bookbot.train_dataloaders(train_cuts)
+
     valid_dl = bookbot.valid_dataloaders()
 
     if not params.print_diagnostics:
