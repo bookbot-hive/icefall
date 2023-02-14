@@ -37,3 +37,22 @@ def main():
 
 if __name__ == "__main__":
     main()
+
+"""
+## train
+Cuts count: 154152
+Total duration (hh:mm:ss): 136:06:05
+Speech duration (hours): 136:06:05 (100.0%)
+***
+Duration statistics (seconds):
+mean    3.2
+std     4.5
+min     0.2
+25%     0.5
+50%     1.8
+75%     3.9
+99%     22.1
+99.5%   28.2
+99.9%   42.9
+max     91.5
+"""
