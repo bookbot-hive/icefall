@@ -151,7 +151,7 @@ class BookbotAsrDataModule(DataModule):
 
     def train_dataloaders(self, cuts_train: CutSet = None) -> DataLoader:
         logging.info("About to get train cuts")
-        if cuts_train is not None:
+        if cuts_train is None:
             cuts_train = self.train_cuts()
 
         logging.info("About to get Musan cuts")
