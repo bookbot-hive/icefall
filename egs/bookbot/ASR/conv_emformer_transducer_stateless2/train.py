@@ -228,7 +228,7 @@ def get_parser():
     parser.add_argument(
         "--lang-dir",
         type=str,
-        default="data/lang_char",
+        default="data/lang_phone",
         help="""The lang dir
         It contains language related input files such as
         "lexicon.txt"
