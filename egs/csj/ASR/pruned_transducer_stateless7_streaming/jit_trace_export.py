@@ -1,57 +1,24 @@
 #!/usr/bin/env python3
 
 """
-Please see
-https://k2-fsa.github.io/icefall/model-export/export-ncnn.html
-for more details about how to use this file.
-
-We use the pre-trained model from
-https://huggingface.co/csukuangfj/icefall-asr-librispeech-lstm-transducer-stateless2-2022-09-03
-as an example to show how to use this file.
-
-1. Download the pre-trained model
-
-cd egs/librispeech/ASR
-
-repo_url=https://huggingface.co/csukuangfj/icefall-asr-librispeech-lstm-transducer-stateless2-2022-09-03
-GIT_LFS_SKIP_SMUDGE=1 git clone $repo_url
-repo=$(basename $repo_url)
-
-pushd $repo
-git lfs pull --include "data/lang_bpe_500/bpe.model"
-git lfs pull --include "exp/pretrained-iter-468000-avg-16.pt"
-
-cd exp
-ln -s pretrained-iter-468000-avg-16.pt epoch-99.pt
-popd
-
-2. Export via torch.jit.trace()
-
-./lstm_transducer_stateless2/export-for-ncnn.py \
-  --exp-dir $repo/exp \
-  --bpe-model $repo/data/lang_bpe_500/bpe.model \
-  --epoch 99 \
-  --avg 1 \
-  --use-averaged-model 0 \
-
-cd ./lstm_transducer_stateless2/exp
-pnnx encoder_jit_trace-pnnx.pt
-pnnx decoder_jit_trace-pnnx.pt
-pnnx joiner_jit_trace-pnnx.pt
-
-See ./streaming-ncnn-decode.py
-and
-https://github.com/k2-fsa/sherpa-ncnn
-for usage.
+Usage:
+# use -O to skip assertions and avoid some of the TracerWarnings
+python -O pruned_transducer_stateless7_streaming/jit_trace_export.py \
+  --exp-dir ./pruned_transducer_stateless7_streaming/exp \
+  --lang data/lang_char \
+  --epoch 30 \
+  --avg 10 \
+  --use-averaged-model=True \
+  --decode-chunk-len 32
 """
 
 import argparse
 import logging
 from pathlib import Path
 
-import sentencepiece as spm
 import torch
 from scaling_converter import convert_scaled_to_non_scaled
+from tokenizer import Tokenizer
 from train import add_model_arguments, get_params, get_transducer_model
 
 from icefall.checkpoint import (
@@ -60,7 +27,7 @@ from icefall.checkpoint import (
     find_checkpoints,
     load_checkpoint,
 )
-from icefall.utils import setup_logger, str2bool
+from icefall.utils import AttributeDict, str2bool
 
 
 def get_parser():
@@ -99,17 +66,10 @@ def get_parser():
     parser.add_argument(
         "--exp-dir",
         type=str,
-        default="lstm_transducer_stateless2/exp",
+        default="pruned_transducer_stateless2/exp",
         help="""It specifies the directory where all training related
         files, e.g., checkpoints, log, etc, are saved
         """,
-    )
-
-    parser.add_argument(
-        "--bpe-model",
-        type=str,
-        default="data/lang_bpe_500/bpe.model",
-        help="Path to the BPE model",
     )
 
     parser.add_argument(
@@ -138,6 +98,7 @@ def get_parser():
 def export_encoder_model_jit_trace(
     encoder_model: torch.nn.Module,
     encoder_filename: str,
+    params: AttributeDict,
 ) -> None:
     """Export the given encoder model with torch.jit.trace()
 
@@ -149,10 +110,22 @@ def export_encoder_model_jit_trace(
       encoder_filename:
         The filename to save the exported model.
     """
-    x = torch.zeros(1, 100, 80, dtype=torch.float32)
-    x_lens = torch.tensor([100], dtype=torch.int64)
-    states = encoder_model.get_init_states()
+    decode_chunk_len = params.decode_chunk_len  # before subsampling
+    pad_length = 7
+    s = f"decode_chunk_len: {decode_chunk_len}"
+    logging.info(s)
+    assert encoder_model.decode_chunk_size == decode_chunk_len // 2, (
+        encoder_model.decode_chunk_size,
+        decode_chunk_len,
+    )
 
+    T = decode_chunk_len + pad_length
+
+    x = torch.zeros(1, T, 80, dtype=torch.float32)
+    x_lens = torch.full((1,), T, dtype=torch.int32)
+    states = encoder_model.get_init_state(device=x.device)
+
+    encoder_model.__class__.forward = encoder_model.__class__.streaming_forward
     traced_model = torch.jit.trace(encoder_model, (x, x_lens, states))
     traced_model.save(encoder_filename)
     logging.info(f"Saved to {encoder_filename}")
@@ -209,7 +182,9 @@ def export_joiner_model_jit_trace(
 
 @torch.no_grad()
 def main():
-    args = get_parser().parse_args()
+    parser = get_parser()
+    Tokenizer.add_arguments(parser)
+    args = parser.parse_args()
     args.exp_dir = Path(args.exp_dir)
 
     params = get_params()
@@ -217,23 +192,18 @@ def main():
 
     device = torch.device("cpu")
 
-    setup_logger(f"{params.exp_dir}/log-export/log-export-ncnn")
-
     logging.info(f"device: {device}")
 
-    sp = spm.SentencePieceProcessor()
-    sp.load(params.bpe_model)
+    sp = Tokenizer.load(params.lang, params.lang_type)
 
-    # <blk> is defined in local/train_bpe_model.py
+    # <blk> is defined in local/prepare_lang_char.py
     params.blank_id = sp.piece_to_id("<blk>")
     params.vocab_size = sp.get_piece_size()
 
     logging.info(params)
 
-    params.is_pnnx = True
-
     logging.info("About to create model")
-    model = get_transducer_model(params, enable_giga=False)
+    model = get_transducer_model(params)
 
     if not params.use_averaged_model:
         if params.iter > 0:
@@ -316,32 +286,23 @@ def main():
     model.eval()
 
     convert_scaled_to_non_scaled(model, inplace=True)
-
-    encoder_num_param = sum([p.numel() for p in model.encoder.parameters()])
-    decoder_num_param = sum([p.numel() for p in model.decoder.parameters()])
-    joiner_num_param = sum([p.numel() for p in model.joiner.parameters()])
-    total_num_param = encoder_num_param + decoder_num_param + joiner_num_param
-    logging.info(f"encoder parameters: {encoder_num_param}")
-    logging.info(f"decoder parameters: {decoder_num_param}")
-    logging.info(f"joiner parameters: {joiner_num_param}")
-    logging.info(f"total parameters: {total_num_param}")
-
     logging.info("Using torch.jit.trace()")
 
     logging.info("Exporting encoder")
-    encoder_filename = params.exp_dir / "encoder_jit_trace-pnnx.pt"
-    export_encoder_model_jit_trace(model.encoder, encoder_filename)
+    encoder_filename = params.exp_dir / "encoder_jit_trace.pt"
+    export_encoder_model_jit_trace(model.encoder, encoder_filename, params)
 
     logging.info("Exporting decoder")
-    decoder_filename = params.exp_dir / "decoder_jit_trace-pnnx.pt"
+    decoder_filename = params.exp_dir / "decoder_jit_trace.pt"
     export_decoder_model_jit_trace(model.decoder, decoder_filename)
 
     logging.info("Exporting joiner")
-    joiner_filename = params.exp_dir / "joiner_jit_trace-pnnx.pt"
+    joiner_filename = params.exp_dir / "joiner_jit_trace.pt"
     export_joiner_model_jit_trace(model.joiner, joiner_filename)
 
 
 if __name__ == "__main__":
     formatter = "%(asctime)s %(levelname)s [%(filename)s:%(lineno)d] %(message)s"
 
+    logging.basicConfig(format=formatter, level=logging.INFO)
     main()
