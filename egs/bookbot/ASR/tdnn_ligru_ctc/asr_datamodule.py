@@ -149,9 +149,10 @@ class BookbotAsrDataModule(DataModule):
             "collect the batches.",
         )
 
-    def train_dataloaders(self) -> DataLoader:
+    def train_dataloaders(self, cuts_train: CutSet = None) -> DataLoader:
         logging.info("About to get train cuts")
-        cuts_train = self.train_cuts()
+        if not cuts_train:
+            cuts_train = self.train_cuts()
 
         logging.info("About to get Musan cuts")
         cuts_musan = load_manifest(self.args.feature_dir / "musan_cuts.jsonl.gz")
