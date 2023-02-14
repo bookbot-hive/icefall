@@ -998,6 +998,7 @@ def run(rank, world_size, args):
             model_avg=model_avg,
             optimizer=optimizer,
             scheduler=scheduler,
+            lexicon=lexicon,
             train_dl=train_dl,
             valid_dl=valid_dl,
             scaler=scaler,
@@ -1032,6 +1033,7 @@ def scan_pessimistic_batches_for_oom(
     model: Union[nn.Module, DDP],
     train_dl: torch.utils.data.DataLoader,
     optimizer: torch.optim.Optimizer,
+    lexicon: Lexicon,
     params: AttributeDict,
 ):
     from lhotse.dataset import find_pessimistic_batches
@@ -1050,6 +1052,7 @@ def scan_pessimistic_batches_for_oom(
                 loss, _ = compute_loss(
                     params=params,
                     model=model,
+                    lexicon=lexicon,
                     batch=batch,
                     is_training=True,
                     warmup=0.0,
