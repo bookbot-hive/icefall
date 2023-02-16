@@ -84,7 +84,6 @@ def get_parser():
     parser.add_argument(
         "sound_file",
         type=str,
-        nargs="+",
         help="The input sound file(s) to transcribe. "
         "Supported formats are those supported by torchaudio.load(). "
         "For example, wav and flac are supported. "
