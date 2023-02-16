@@ -167,18 +167,18 @@ def greedy_search(
     return hyp, decoder_out
 
 
-def create_streaming_feature_extractor(sample_rate, device: torch.device) -> OnlineFeature:
-    """Create a streaming feature extractor.
+def create_streaming_feature_extractor(sample_rate) -> OnlineFeature:
+    """Create a CPU streaming feature extractor.
 
     At present, we assume it returns a fbank feature extractor with
     fixed options. In the future, we will support passing in the options
     from outside.
 
     Returns:
-      Return a streaming feature extractor.
+      Return a CPU streaming feature extractor.
     """
     opts = FbankOptions()
-    opts.device = device
+    opts.device = "cpu"
     opts.frame_opts.dither = 0
     opts.frame_opts.snip_edges = False
     opts.frame_opts.samp_freq = sample_rate
@@ -193,8 +193,9 @@ def main():
     logging.info(vars(args))
 
     device = torch.device("cpu")
-    if torch.cuda.is_available():
-        device = torch.device("cuda", 0)
+    # CUDA is not supported for OnlineFbank
+    # if torch.cuda.is_available():
+        # device = torch.device("cuda", 0)
 
     logging.info(f"device: {device}")
 
@@ -213,7 +214,7 @@ def main():
     lexicon = Lexicon(args.lang_dir)
 
     logging.info("Constructing Fbank computer")
-    online_fbank = create_streaming_feature_extractor(args.sample_rate, device)
+    online_fbank = create_streaming_feature_extractor(args.sample_rate)
 
     logging.info(f"Reading sound files: {args.sound_file}")
     wave_samples = read_sound_files(
