@@ -986,7 +986,7 @@ def run(rank, world_size, args):
             return False
         return True
 
-    train_cuts = train_cuts.filter(remove_short_and_long_utt)
+    train_cuts = train_cuts.filter(remove_short_and_long_utt).to_eager()
     train_dl = bookbot.train_dataloaders(train_cuts)
 
     valid_dl = bookbot.valid_dataloaders()

@@ -470,7 +470,7 @@ def main():
     # we need cut ids to display recognition results.
     args.return_cuts = True
     bookbot = BookbotAsrDataModule(args)
-    test_set = "train"
+    test_set = "test"
     test_dl = bookbot.test_dataloaders()
 
     results_dict = decode_dataset(
