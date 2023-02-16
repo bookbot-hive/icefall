@@ -167,18 +167,18 @@ def greedy_search(
     return hyp, decoder_out
 
 
-def create_streaming_feature_extractor(sample_rate) -> OnlineFeature:
-    """Create a CPU streaming feature extractor.
+def create_streaming_feature_extractor(sample_rate, device: torch.device) -> OnlineFeature:
+    """Create a streaming feature extractor.
 
     At present, we assume it returns a fbank feature extractor with
     fixed options. In the future, we will support passing in the options
     from outside.
 
     Returns:
-      Return a CPU streaming feature extractor.
+      Return a streaming feature extractor.
     """
     opts = FbankOptions()
-    opts.device = "cpu"
+    opts.device = device
     opts.frame_opts.dither = 0
     opts.frame_opts.snip_edges = False
     opts.frame_opts.samp_freq = sample_rate
@@ -213,7 +213,7 @@ def main():
     lexicon = Lexicon(args.lang_dir)
 
     logging.info("Constructing Fbank computer")
-    online_fbank = create_streaming_feature_extractor(args.sample_rate)
+    online_fbank = create_streaming_feature_extractor(args.sample_rate, device)
 
     logging.info(f"Reading sound files: {args.sound_file}")
     wave_samples = read_sound_files(
@@ -263,8 +263,7 @@ def main():
             num_processed_frames += chunk_length
             frames = torch.cat(frames, dim=0).unsqueeze(0)
             # TODO(fangjun): remove x_lens
-            x_lens = torch.tensor([T])
-            encoder_out, _, states = encoder(frames, x_lens, states)
+            encoder_out, states = encoder(frames, states)
 
             hyp, decoder_out = greedy_search(
                 decoder, joiner, encoder_out.squeeze(0), decoder_out, hyp
@@ -274,7 +273,7 @@ def main():
 
     logging.info(args.sound_file)
     tokens = [lexicon.token_table[i] for i in hyp[context_size:]]
-    logging.info("".join(tokens))
+    logging.info(" ".join(tokens))
 
     logging.info("Decoding Done")
 
