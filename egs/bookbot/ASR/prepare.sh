@@ -87,7 +87,7 @@ if [ $stage -le 1 ] && [ $stop_stage -ge 1 ]; then
   #   ln -sfv /path/to/training $dl_dir/bookbot/
   #
   mkdir -p data/manifests
-  lhotse prepare bookbot $dl_dir/bookbot/training data/manifests
+  lhotse prepare bookbot $dl_dir/bookbot data/manifests
 fi
 
 if [ $stage -le 2 ] && [ $stop_stage -ge 2 ]; then
