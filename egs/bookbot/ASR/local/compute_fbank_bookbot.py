@@ -50,7 +50,7 @@ def compute_fbank_bookbot():
 
     dataset_parts = (
         "train",
-        "dev",
+        "validation",
         "test",
     )
     prefix = "bookbot"
