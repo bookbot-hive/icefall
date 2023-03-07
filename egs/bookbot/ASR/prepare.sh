@@ -58,7 +58,16 @@ if [ $stage -le -1 ] && [ $stop_stage -ge -1 ]; then
 fi
 
 if [ $stage -le 0 ] && [ $stop_stage -ge 0 ]; then
-  log "Stage 0: Download musan data"
+  log "Stage 0: Download data"
+
+  # If you have pre-downloaded it to /path/to/bookbot,
+  # you can create a symlink
+  #
+  #   ln -sfv /path/to/bookbot $dl_dir/bookbot
+  #
+  if [ ! -d $dl_dir/bookbot ]; then
+    lhotse download bookbot bookbot/bookbot_en_v1-v2 $dl_dir
+  fi
 
   # If you have pre-downloaded it to /path/to/musan,
   # you can create a symlink

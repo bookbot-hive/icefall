@@ -245,7 +245,7 @@ class BookbotAsrDataModule(DataModule):
         return train_dl
 
     def valid_dataloaders(self) -> DataLoader:
-        logging.info("About to get dev cuts")
+        logging.info("About to get validation cuts")
         cuts_valid = self.valid_cuts()
 
         transforms = []
@@ -256,7 +256,7 @@ class BookbotAsrDataModule(DataModule):
                 )
             ] + transforms
 
-        logging.info("About to create dev dataset")
+        logging.info("About to create validation dataset")
         if self.args.on_the_fly_feats:
             validate = K2SpeechRecognitionDataset(
                 cut_transforms=transforms,
@@ -273,7 +273,7 @@ class BookbotAsrDataModule(DataModule):
             max_duration=self.args.max_duration,
             shuffle=False,
         )
-        logging.info("About to create dev dataloader")
+        logging.info("About to create validation dataloader")
         valid_dl = DataLoader(
             validate,
             sampler=valid_sampler,
@@ -320,9 +320,9 @@ class BookbotAsrDataModule(DataModule):
 
     @lru_cache()
     def valid_cuts(self) -> CutSet:
-        logging.info("About to get dev cuts")
+        logging.info("About to get validation cuts")
         cuts_valid = load_manifest_lazy(
-            self.args.feature_dir / "bookbot_cuts_dev.jsonl.gz"
+            self.args.feature_dir / "bookbot_cuts_validation.jsonl.gz"
         )
 
         return cuts_valid
