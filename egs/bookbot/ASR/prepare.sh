@@ -7,6 +7,7 @@ set -eou pipefail
 
 stage=-1
 stop_stage=100
+lang="en"
 
 # We assume dl_dir (download dir) contains the following
 # directories and files. If not, they will be downloaded
@@ -53,7 +54,13 @@ if [ $stage -le -1 ] && [ $stop_stage -ge -1 ]; then
   # We assume that you have installed the git-lfs, if not, you could install it
   # using: `sudo apt-get install git-lfs && git-lfs install`
   [ ! -e $dl_dir/lm ] && mkdir -p $dl_dir/lm
-  git clone https://huggingface.co/bookbot/bookbot_en_kaldilm $dl_dir/lm
+
+  if [ $lang = "id" ]; then
+    git clone https://huggingface.co/bookbot/bookbot_id_kaldilm $dl_dir/lm
+  else
+    git clone https://huggingface.co/bookbot/bookbot_en_kaldilm $dl_dir/lm
+  fi
+
   cd $dl_dir/lm && git lfs pull
 fi
 
