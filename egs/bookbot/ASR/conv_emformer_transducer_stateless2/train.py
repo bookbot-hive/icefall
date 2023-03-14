@@ -968,6 +968,7 @@ def run(rank, world_size, args):
     bookbot = BookbotAsrDataModule(args)
 
     train_cuts = bookbot.train_cuts()
+    valid_cuts = bookbot.valid_cuts()
 
     def remove_short_and_long_utt(c: Cut):
         # Keep only utterances with duration between 1 second and 25 seconds
@@ -989,7 +990,8 @@ def run(rank, world_size, args):
     train_cuts = train_cuts.filter(remove_short_and_long_utt).to_eager()
     train_dl = bookbot.train_dataloaders(train_cuts)
 
-    valid_dl = bookbot.valid_dataloaders()
+    valid_cuts = valid_cuts.filter(remove_short_and_long_utt).to_eager()
+    valid_dl = bookbot.valid_dataloaders(valid_cuts)
 
     if not params.print_diagnostics:
         scan_pessimistic_batches_for_oom(

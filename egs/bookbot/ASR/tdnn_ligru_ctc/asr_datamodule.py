@@ -244,9 +244,10 @@ class BookbotAsrDataModule(DataModule):
 
         return train_dl
 
-    def valid_dataloaders(self) -> DataLoader:
+    def valid_dataloaders(self, cuts_valid: CutSet = None) -> DataLoader:
         logging.info("About to get validation cuts")
-        cuts_valid = self.valid_cuts()
+        if cuts_valid is None:
+            cuts_valid = self.valid_cuts()
 
         transforms = []
         if self.args.concatenate_cuts:
