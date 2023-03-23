@@ -9,6 +9,13 @@ stage=-1
 stop_stage=100
 lang="en"
 
+vocab_sizes=(
+  # 5000
+  # 2000
+  # 1000
+  500
+)
+
 # We assume dl_dir (download dir) contains the following
 # directories and files. If not, they will be downloaded
 # by this script automatically.
@@ -111,23 +118,21 @@ if [ $stage -le 5 ] && [ $stop_stage -ge 5 ]; then
   fi
 fi
 
-# if [ $stage -le 6 ] && [ $stop_stage -ge 6 ]; then
-#   log "Stage 6: Prepare BPE based lang"
+if [ $stage -le 6 ] && [ $stop_stage -ge 6 ]; then
+  log "Stage 6: Prepare BPE based lang"
 
-#   for vocab_size in ${vocab_sizes[@]}; do
-#     lang_dir=data/lang_bpe_${vocab_size}
-#     mkdir -p $lang_dir
-#     # We reuse words.txt from phone based lexicon
-#     # so that the two can share G.pt later.
-#     cp data/lang/words.txt $lang_dir
+  for vocab_size in ${vocab_sizes[@]}; do
+    lang_dir=data/lang_bpe_${vocab_size}
+    mkdir -p $lang_dir
+    cp data/lang/words.txt $lang_dir
 
-#     ./local/train_bpe_model.py \
-#       --lang-dir $lang_dir \
-#       --vocab-size $vocab_size \
-#       --transcript data/lang/train.txt
+    ./local/train_bpe_model.py \
+      --lang-dir $lang_dir \
+      --vocab-size $vocab_size \
+      --transcript data/lang/train.txt
 
-#     if [ ! -f $lang_dir/L_disambig.pt ]; then
-#       ./local/prepare_lang_bpe.py --lang-dir $lang_dir --oov "<unk>"
-#     fi
-#   done
-# fi
+    if [ ! -f $lang_dir/L_disambig.pt ]; then
+      ./local/prepare_lang_bpe.py --lang-dir $lang_dir --oov "<unk>"
+    fi
+  done
+fi
