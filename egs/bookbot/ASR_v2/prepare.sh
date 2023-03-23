@@ -16,15 +16,6 @@ lang="en"
 #  - $dl_dir/bookbot
 #      You can find `training` folder inside it.
 #
-#  - $dl_dir/lm
-#      This directory contains the language model(LM) downloaded from
-#      https://huggingface.co/bookbot/bookbot_en_kaldilm, and the LM is based
-#	     on 40 phones. About how to get these LM files, you can know it
-#      from https://github.com/luomingshuang/Train_LM_with_kaldilm.
-#
-#	  - lm_3_gram.arpa
-#     - lm_4_gram.arpa
-#
 #  - $dl_dir/musan
 #      This directory contains the following directories downloaded from
 #       http://www.openslr.org/17/
@@ -58,7 +49,7 @@ if [ $stage -le 0 ] && [ $stop_stage -ge 0 ]; then
   #   ln -sfv /path/to/bookbot $dl_dir/bookbot
   #
   if [ ! -d $dl_dir/bookbot ]; then
-    lhotse download bookbot bookbot/bookbot_en_v1-v2 $dl_dir
+    lhotse download bookbot bookbot/bookbot_en_v1-v2 $dl_dir --use-phonemes False
   fi
 
   # If you have pre-downloaded it to /path/to/musan,
