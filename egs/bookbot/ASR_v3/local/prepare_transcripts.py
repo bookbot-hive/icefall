@@ -1,0 +1,1 @@
+../../ASR_v2/local/prepare_transcripts.py
