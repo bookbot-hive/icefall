@@ -154,6 +154,7 @@ if [ $stage -le 6 ] && [ $stop_stage -ge 6 ]; then
       --disambig-symbol='#0' \
       --max-order=2 \
       $lang_dir/P.arpa > $lang_dir/P.fst.txt
+  fi
 fi
 
 if [ $stage -le 7 ] && [ $stop_stage -ge 7 ]; then
