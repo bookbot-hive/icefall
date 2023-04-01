@@ -618,8 +618,7 @@ def compute_loss(
     info = MetricsTracker()
     if batch_idx_train < warm_step:
         # Training with ctc loss
-        token_ids = ctc_graph_compiler.texts_to_ids(texts)
-        decoding_graph = ctc_graph_compiler.compile(token_ids)
+        decoding_graph = ctc_graph_compiler.compile(texts)
         loss = k2.ctc_loss(
             decoding_graph=decoding_graph,
             dense_fsa_vec=dense_fsa_vec,
