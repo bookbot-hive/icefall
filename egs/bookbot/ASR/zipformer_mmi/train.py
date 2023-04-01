@@ -68,7 +68,7 @@ from torch.utils.tensorboard import SummaryWriter
 from zipformer import Zipformer
 
 from icefall import diagnostics
-from icefall.bpe_graph_compiler import BpeCtcTrainingGraphCompiler
+from icefall.graph_compiler import CtcTrainingGraphCompiler
 from icefall.checkpoint import load_checkpoint, remove_checkpoints
 from icefall.checkpoint import save_checkpoint as save_checkpoint_impl
 from icefall.checkpoint import (
@@ -227,7 +227,7 @@ def get_parser():
     parser.add_argument(
         "--lang-dir",
         type=str,
-        default="data/lang_bpe_500",
+        default="data/lang_phone",
         help="""The lang dir
         It contains language related input files such as
         "lexicon.txt"
@@ -560,7 +560,7 @@ def save_checkpoint(
 def compute_loss(
     params: AttributeDict,
     model: Union[nn.Module, DDP],
-    ctc_graph_compiler: BpeCtcTrainingGraphCompiler,
+    ctc_graph_compiler: CtcTrainingGraphCompiler,
     mmi_graph_compiler: MmiTrainingGraphCompiler,
     batch: dict,
     is_training: bool,
@@ -618,7 +618,6 @@ def compute_loss(
     info = MetricsTracker()
     if batch_idx_train < warm_step:
         # Training with ctc loss
-        # Works with a BPE model
         token_ids = ctc_graph_compiler.texts_to_ids(texts)
         decoding_graph = ctc_graph_compiler.compile(token_ids)
         loss = k2.ctc_loss(
@@ -654,7 +653,7 @@ def compute_loss(
 def compute_validation_loss(
     params: AttributeDict,
     model: Union[nn.Module, DDP],
-    ctc_graph_compiler: BpeCtcTrainingGraphCompiler,
+    ctc_graph_compiler: CtcTrainingGraphCompiler,
     mmi_graph_compiler: MmiTrainingGraphCompiler,
     valid_dl: torch.utils.data.DataLoader,
     world_size: int = 1,
@@ -692,7 +691,7 @@ def train_one_epoch(
     model: Union[nn.Module, DDP],
     optimizer: torch.optim.Optimizer,
     scheduler: LRSchedulerType,
-    ctc_graph_compiler: BpeCtcTrainingGraphCompiler,
+    ctc_graph_compiler: CtcTrainingGraphCompiler,
     mmi_graph_compiler: MmiTrainingGraphCompiler,
     train_dl: torch.utils.data.DataLoader,
     valid_dl: torch.utils.data.DataLoader,
@@ -921,13 +920,7 @@ def run(rank, world_size, args):
         device = torch.device("cuda", rank)
     logging.info(f"Device: {device}")
 
-    assert "lang_bpe" in str(params.lang_dir)
-    ctc_graph_compiler = BpeCtcTrainingGraphCompiler(
-        params.lang_dir,
-        device=device,
-        sos_token="<sos/eos>",
-        eos_token="<sos/eos>",
-    )
+    ctc_graph_compiler = CtcTrainingGraphCompiler(lexicon, device=device)
     mmi_graph_compiler = MmiTrainingGraphCompiler(
         params.lang_dir,
         uniq_filename="lexicon.txt",
@@ -1099,8 +1092,6 @@ def display_and_save_batch(
         for the content in it.
       params:
         Parameters for training. See :func:`get_params`.
-      sp:
-        The BPE model.
     """
     from lhotse.utils import uuid4
 
@@ -1121,7 +1112,7 @@ def scan_pessimistic_batches_for_oom(
     model: Union[nn.Module, DDP],
     train_dl: torch.utils.data.DataLoader,
     optimizer: torch.optim.Optimizer,
-    ctc_graph_compiler: BpeCtcTrainingGraphCompiler,
+    ctc_graph_compiler: CtcTrainingGraphCompiler,
     mmi_graph_compiler: MmiTrainingGraphCompiler,
     params: AttributeDict,
 ):
