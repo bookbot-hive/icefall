@@ -132,7 +132,32 @@ if [ $stage -le 5 ] && [ $stop_stage -ge 5 ]; then
 fi
 
 if [ $stage -le 6 ] && [ $stop_stage -ge 6 ]; then
-  log "Stage 6: Prepare G"
+  log "Stage 6: Prepare bigram token-level P for MMI training"
+  lang_dir=data/lang_phone
+
+  if [ ! -f $lang_dir/transcript_tokens.txt ]; then
+    ./local/prepare_transcripts.py \
+      --manifests-dir data/manifests \
+      --output-text-path $lang_dir/transcript_tokens.txt
+  fi
+
+  if [ ! -f $lang_dir/P.arpa ]; then
+    ./shared/make_kn_lm.py \
+      -ngram-order 2 \
+      -text $lang_dir/transcript_tokens.txt \
+      -lm $lang_dir/P.arpa
+  fi
+
+  if [ ! -f $lang_dir/P.fst.txt ]; then
+    python3 -m kaldilm \
+      --read-symbol-table="$lang_dir/tokens.txt" \
+      --disambig-symbol='#0' \
+      --max-order=2 \
+      $lang_dir/P.arpa > $lang_dir/P.fst.txt
+fi
+
+if [ $stage -le 7 ] && [ $stop_stage -ge 7 ]; then
+  log "Stage 7: Prepare G"
   # We assume you have installed kaldilm, if not, please install
   # it using: pip install kaldilm
 
@@ -156,7 +181,13 @@ if [ $stage -le 6 ] && [ $stop_stage -ge 6 ]; then
   fi
 fi
 
-if [ $stage -le 7 ] && [ $stop_stage -ge 7 ]; then
-  log "Stage 7: Compile HLG"
+if [ $stage -le 8 ] && [ $stop_stage -ge 8 ]; then
+  log "Stage 8: Compile HLG"
   ./local/compile_hlg.py --lang-dir data/lang_phone
+fi
+
+# Compile LG for RNN-T fast_beam_search decoding
+if [ $stage -le 9 ] && [ $stop_stage -ge 9 ]; then
+  log "Stage 9: Compile LG"
+  ./local/compile_lg.py --lang-dir data/lang_phone
 fi
