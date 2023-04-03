@@ -61,7 +61,7 @@ if [ $stage -le 0 ] && [ $stop_stage -ge 0 ]; then
   fi
 
   if [ ! -d $dl_dir/commonvoice ]; then
-    lhotse download commonvoice_phonemes bookbot/p2g-common-voice-accents $dl_dir
+    lhotse download commonvoice-phonemes bookbot/p2g-common-voice-accents $dl_dir
   fi
 
   # If you have pre-downloaded it to /path/to/musan,
@@ -86,14 +86,14 @@ if [ $stage -le 1 ] && [ $stop_stage -ge 1 ]; then
 fi
 
 if [ $stage -le 2 ] && [ $stop_stage -ge 2 ]; then
-  log "Stage 2: Prepare CommonVoice Phonemes manifest"
+  log "Stage 2: Prepare CommonVoice-phonemes manifest"
 
   # Create a symlink from local path
   #
   #   ln -sfv /path/to/training $dl_dir/commonvoice/
   #
   mkdir -p data/manifests
-  lhotse prepare commonvoice_phonemes $dl_dir/commonvoice data/manifests
+  lhotse prepare commonvoice-phonemes $dl_dir/commonvoice data/manifests
 fi
 
 if [ $stage -le 3 ] && [ $stop_stage -ge 3 ]; then
@@ -111,13 +111,19 @@ if [ $stage -le 4 ] && [ $stop_stage -ge 4 ]; then
 fi
 
 if [ $stage -le 5 ] && [ $stop_stage -ge 5 ]; then
-  log "Stage 5: Compute fbank for musan"
+  log "Stage 5: Compute fbank for CommonVoice-phonemes"
+  mkdir -p data/fbank
+  ./local/compute_fbank_commonvoice_phonemes.py
+fi
+
+if [ $stage -le 6 ] && [ $stop_stage -ge 6 ]; then
+  log "Stage 6: Compute fbank for musan"
   mkdir -p data/fbank
   ./local/compute_fbank_musan.py
 fi
 
-if [ $stage -le 6 ] && [ $stop_stage -ge 6 ]; then
-  log "Stage 6: Prepare phone based lang"
+if [ $stage -le 7 ] && [ $stop_stage -ge 7 ]; then
+  log "Stage 7: Prepare phone based lang"
   lang_dir=data/lang_phone
   mkdir -p $lang_dir
 
