@@ -122,10 +122,13 @@ def get_parser():
     )
 
     parser.add_argument(
-        "--bpe-model",
+        "--lang-dir",
         type=str,
-        default="data/lang_bpe_500/bpe.model",
-        help="Path to the BPE model",
+        default="data/lang_phone",
+        help="""The lang dir
+        It contains language related input files such as
+        "lexicon.txt"
+        """,
     )
 
     parser.add_argument(
