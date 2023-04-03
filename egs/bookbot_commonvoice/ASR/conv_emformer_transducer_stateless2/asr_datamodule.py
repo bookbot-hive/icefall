@@ -150,8 +150,6 @@ class AsrDataModule(DataModule):
 
     def train_dataloaders(self, cuts_train: CutSet = None) -> DataLoader:
         logging.info("About to get train cuts")
-        if cuts_train is None:
-            cuts_train = self.train_cuts()
 
         logging.info("About to get Musan cuts")
         cuts_musan = load_manifest(self.args.feature_dir / "musan_cuts.jsonl.gz")
@@ -245,8 +243,6 @@ class AsrDataModule(DataModule):
 
     def valid_dataloaders(self, cuts_valid: CutSet = None) -> DataLoader:
         logging.info("About to get validation cuts")
-        if cuts_valid is None:
-            cuts_valid = self.valid_cuts()
 
         transforms = []
         if self.args.concatenate_cuts:
@@ -284,8 +280,7 @@ class AsrDataModule(DataModule):
 
         return valid_dl
 
-    def test_dataloaders(self) -> Union[DataLoader, List[DataLoader]]:
-        cuts = self.test_cuts()
+    def test_dataloaders(self, cuts: CutSet) -> Union[DataLoader, List[DataLoader]]:
         is_list = isinstance(cuts, list)
         test_loaders = []
         if not is_list:
