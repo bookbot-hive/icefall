@@ -45,7 +45,7 @@ torch.set_num_interop_threads(1)
 def compute_fbank_commonvoice_phonemes():
     src_dir = Path("data/manifests")
     output_dir = Path("data/fbank")
-    num_jobs = min(15, os.cpu_count())
+    num_jobs = min(6, os.cpu_count())
     num_mel_bins = 80
 
     dataset_parts = (
