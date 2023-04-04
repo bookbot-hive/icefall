@@ -37,7 +37,7 @@ class CommonVoicePhonemes:
     def train_cuts(self) -> CutSet:
         logging.info("About to get train cuts")
         cuts_train = load_manifest_lazy(
-            self.args.feature_dir / "commonvoice_cuts_train.jsonl.gz"
+            self.manifest_dir / "commonvoice_cuts_train.jsonl.gz"
         )
 
         return cuts_train
@@ -45,7 +45,7 @@ class CommonVoicePhonemes:
     def valid_cuts(self) -> CutSet:
         logging.info("About to get validation cuts")
         cuts_valid = load_manifest_lazy(
-            self.args.feature_dir / "commonvoice_cuts_validation.jsonl.gz"
+            self.manifest_dir / "commonvoice_cuts_validation.jsonl.gz"
         )
 
         return cuts_valid
@@ -53,7 +53,7 @@ class CommonVoicePhonemes:
     def test_cuts(self) -> CutSet:
         logging.debug("About to get test cuts")
         cuts_test = load_manifest_lazy(
-            self.args.feature_dir / "commonvoice_cuts_test.jsonl.gz"
+            self.manifest_dir / "commonvoice_cuts_test.jsonl.gz"
         )
 
         return cuts_test
