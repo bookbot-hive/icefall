@@ -57,7 +57,7 @@ if [ $stage -le 0 ] && [ $stop_stage -ge 0 ]; then
   #   ln -sfv /path/to/bookbot $dl_dir/bookbot
   #
   if [ ! -d $dl_dir/bookbot ]; then
-    lhotse download bookbot bookbot/bookbot_en_v1-v2 $dl_dir
+    lhotse download bookbot bookbot/bookbot_en_v1-v2 $dl_dir --use-phonemes True
   fi
 
   if [ ! -d $dl_dir/commonvoice ]; then
