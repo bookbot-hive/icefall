@@ -967,8 +967,8 @@ def run(rank, world_size, args):
         )  # allow 4 megabytes per sub-module
         diagnostic = diagnostics.attach_diagnostics(model, opts)
 
-    bookbot = Bookbot(manifest_dir=args.manifest_dir)
-    commonvoice = CommonVoicePhonemes(manifest_dir=args.manifest_dir)
+    bookbot = Bookbot(manifest_dir=args.feature_dir)
+    commonvoice = CommonVoicePhonemes(manifest_dir=args.feature_dir)
 
     train_bookbot_cuts = bookbot.train_cuts()
     train_commonvoice_cuts = commonvoice.train_cuts()
