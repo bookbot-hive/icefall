@@ -626,16 +626,13 @@ def main():
     args.return_cuts = True
     asr_datamodule = BookbotAsrDataModule(args)
 
-    austalk = AusTalkWordsMQ(manifest_dir=args.feature_dir)
-    sccw = SCCWChildren(manifest_dir=args.feature_dir)
-    timit_gruut = TIMITASRGruut(manifest_dir=args.feature_dir)
-
-    austalk_test_dl = asr_datamodule.test_dataloaders(austalk.test_cuts())
-    sccw_test_dl = asr_datamodule.test_dataloaders(sccw.test_cuts())
-    timit_gruut_test_dl = asr_datamodule.test_dataloaders(timit_gruut.test_cuts())
+    austalk_test_cuts = AusTalkWordsMQ(manifest_dir=args.feature_dir).test_cuts()
+    sccw_test_cuts = SCCWChildren(manifest_dir=args.feature_dir).test_cuts()
+    timit_gruut_cuts = TIMITASRGruut(manifest_dir=args.feature_dir).test_cuts()
 
     test_sets = ["austalk", "sc-cw", "timit-gruut"]
-    test_dls = [austalk_test_dl, sccw_test_dl, timit_gruut_test_dl]
+    test_cuts = [austalk_test_cuts, sccw_test_cuts, timit_gruut_cuts]
+    test_dls = asr_datamodule.test_dataloaders(test_cuts)
 
     for test_set, test_dl in zip(test_sets, test_dls):
         results_dict = decode_dataset(
