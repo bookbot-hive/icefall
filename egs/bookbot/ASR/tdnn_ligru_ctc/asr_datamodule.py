@@ -285,8 +285,9 @@ class BookbotAsrDataModule(DataModule):
 
         return valid_dl
 
-    def test_dataloaders(self) -> Union[DataLoader, List[DataLoader]]:
-        cuts = self.test_cuts()
+    def test_dataloaders(self, cuts: Union[CutSet, List[CutSet]] = None) -> Union[DataLoader, List[DataLoader]]:
+        if cuts is None:
+            cuts = self.test_cuts()
         is_list = isinstance(cuts, list)
         test_loaders = []
         if not is_list:
