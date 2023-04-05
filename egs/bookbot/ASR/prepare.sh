@@ -192,3 +192,34 @@ if [ $stage -le 9 ] && [ $stop_stage -ge 9 ]; then
   log "Stage 9: Compile LG"
   ./local/compile_lg.py --lang-dir data/lang_phone
 fi
+
+if [ $stage -le 10 ] && [ $stop_stage -ge 10 ]; then
+  log "Stage 10: Download data"
+
+  if [ ! -d $dl_dir/austalk_words_mq ]; then
+    lhotse download austalk-words-mq bookbot/austalk_words_mq $dl_dir --use-phonemes True
+  fi
+
+  if [ ! -d $dl_dir/sc_cw_children ]; then
+    lhotse download sc-cw-children bookbot/sc_cw_children $dl_dir --use-phonemes True
+  fi
+
+  if [ ! -d $dl_dir/timit_asr_gruut ]; then
+    lhotse download timit-asr-gruut bookbot/timit_asr_gruut $dl_dir --use-phonemes True
+  fi
+fi
+
+if [ $stage -le 11 ] && [ $stop_stage -ge 11 ]; then
+  log "Stage 11: Prepare manifests"
+
+  lhotse prepare austalk-words-mq $dl_dir/austalk_words_mq data/manifests
+  lhotse prepare sc-cw-children $dl_dir/sc_cw_children data/manifests
+  lhotse prepare timit-asr-gruut $dl_dir/timit_asr_gruut data/manifests
+fi
+
+if [ $stage -le 12 ] && [ $stop_stage -ge 12 ]; then
+  log "Stage 12: Compute fbanks"
+  ./local/compute_fbank_austalk.py
+  ./local/compute_fbank_commonvoice_sc-cw.py
+  ./local/compute_fbank_timit_gruut.py
+fi
