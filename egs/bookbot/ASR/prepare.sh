@@ -220,6 +220,6 @@ fi
 if [ $stage -le 12 ] && [ $stop_stage -ge 12 ]; then
   log "Stage 12: Compute fbanks"
   ./local/compute_fbank_austalk.py
-  ./local/compute_fbank_commonvoice_sc-cw.py
+  ./local/compute_fbank_sc-cw.py
   ./local/compute_fbank_timit_gruut.py
 fi
