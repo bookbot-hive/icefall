@@ -1,0 +1,1 @@
+../../../timit/ASR/tdnn_ligru_ctc/model.py
