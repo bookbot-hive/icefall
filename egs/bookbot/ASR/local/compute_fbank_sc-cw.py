@@ -42,13 +42,13 @@ torch.set_num_threads(1)
 torch.set_num_interop_threads(1)
 
 
-def compute_fbank_commonvoice_phonemes():
+def compute_fbank_sccw():
     src_dir = Path("data/manifests")
     output_dir = Path("data/fbank")
-    num_jobs = min(6, os.cpu_count())
+    num_jobs = min(15, os.cpu_count())
     num_mel_bins = 80
 
-    dataset_parts = ("test")
+    dataset_parts = ("test",)
     prefix = "sc_cw_children"
     suffix = "jsonl.gz"
     manifests = read_manifests_if_cached(
@@ -99,4 +99,4 @@ if __name__ == "__main__":
 
     logging.basicConfig(format=formatter, level=logging.INFO)
 
-    compute_fbank_commonvoice_phonemes()
+    compute_fbank_sccw()
