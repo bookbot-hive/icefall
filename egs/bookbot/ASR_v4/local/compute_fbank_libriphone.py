@@ -49,9 +49,9 @@ def compute_fbank_libriphone():
     num_mel_bins = 80
 
     dataset_parts = (
-        "train.clean.100",
-        "dev.clean",
-        "test.clean",
+        "train.clean",
+        "dev",
+        "test",
     )
     prefix = "libriphone"
     suffix = "jsonl.gz"
