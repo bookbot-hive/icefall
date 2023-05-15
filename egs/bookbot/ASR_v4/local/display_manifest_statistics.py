@@ -40,19 +40,19 @@ if __name__ == "__main__":
 
 """
 ## train
-Cuts count: 202959
-Total duration (hh:mm:ss): 130:38:11
-Speech duration (hours): 130:38:11 (100.0%)
+Cuts count: 146243
+Total duration (hh:mm:ss): 219:26:12
+Speech duration (hours): 219:26:12 (100.0%)
 ***
 Duration statistics (seconds):
-mean    2.3
-std     2.4
-min     0.0
-25%     0.8
-50%     1.5
-75%     2.9
-99%     11.7
-99.5%   14.5
-99.9%   21.8
-max     76.9
+mean    5.4
+std     4.2
+min     0.9
+25%     2.7
+50%     3.9
+75%     5.9
+99%     16.1
+99.5%   16.4
+99.9%   17.0
+max     66.6
 """
