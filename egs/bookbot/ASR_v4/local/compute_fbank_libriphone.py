@@ -34,7 +34,7 @@ from lhotse.recipes.utils import read_manifests_if_cached
 
 from icefall.utils import get_executor
 
-from .augment_cuts import augment_cuts
+from augment_cuts import augment_cuts
 
 # Torch's multithreaded behavior needs to be disabled or
 # it wastes a lot of CPU and slow things down.
