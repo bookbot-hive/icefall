@@ -34,6 +34,7 @@ from lhotse.dataset import (  # noqa F401 for PrecomputedFeatures
     SingleCutSampler,
     SpecAugment,
 )
+from lhotse.dataset.cut_transforms import PerturbSpeed, PerturbVolume
 from lhotse.dataset.input_strategies import (  # noqa F401 For AudioSamples
     AudioSamples,
     OnTheFlyFeatures,
@@ -213,7 +214,10 @@ class AsrDataModule:
           sampler_state_dict:
             The state dict for the training sampler.
         """
-        transforms = []
+        transforms = [
+            PerturbVolume(p=0.8, preserve_id=True),
+            PerturbSpeed(factors=[0.8, 1.25], p=0.3, preserve_id=True),
+        ]
         if self.args.enable_musan:
             logging.info("Enable MUSAN")
             logging.info("About to get Musan cuts")
