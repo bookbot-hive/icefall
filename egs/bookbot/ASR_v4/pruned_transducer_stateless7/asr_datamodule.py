@@ -214,10 +214,7 @@ class AsrDataModule:
           sampler_state_dict:
             The state dict for the training sampler.
         """
-        transforms = [
-            PerturbVolume(p=0.8, preserve_id=True),
-            PerturbSpeed(factors=[0.8, 1.25], p=0.3, preserve_id=True),
-        ]
+        transforms = []
         if self.args.enable_musan:
             logging.info("Enable MUSAN")
             logging.info("About to get Musan cuts")
@@ -285,7 +282,10 @@ class AsrDataModule:
             # Speed perturbation probably should come first before
             # concatenation, but in principle the transforms order doesn't have
             # to be strict (e.g. could be randomized)
-            # transforms = [PerturbSpeed(factors=[0.9, 1.1], p=2/3)] + transforms   # noqa
+            transforms = [
+                PerturbVolume(p=0.8, preserve_id=True),
+                PerturbSpeed(factors=[0.8, 1.25], p=0.3, preserve_id=True),
+            ] + transforms
             # Drop feats to be on the safe side.
             train = K2SpeechRecognitionDataset(
                 cut_transforms=transforms,
