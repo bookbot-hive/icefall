@@ -1091,7 +1091,7 @@ def run(rank, world_size, args):
     valid_cuts = multidataset.valid_cuts()
     valid_dl = asr_data_module.valid_dataloaders(valid_cuts)
 
-    if not params.use_multidataset and not params.print_diagnostics:
+    if not params.print_diagnostics:
         scan_pessimistic_batches_for_oom(
             model=model,
             train_dl=train_dl,
