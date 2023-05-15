@@ -282,10 +282,10 @@ class AsrDataModule:
             # Speed perturbation probably should come first before
             # concatenation, but in principle the transforms order doesn't have
             # to be strict (e.g. could be randomized)
-            transforms = [
-                PerturbVolume(p=0.8, preserve_id=True),
-                PerturbSpeed(factors=[0.8, 1.25], p=0.3, preserve_id=True),
-            ] + transforms
+            # transforms = [
+            #     PerturbVolume(p=0.8, preserve_id=True),
+            #     PerturbSpeed(factors=[0.8, 1.25], p=0.3, preserve_id=True),
+            # ] + transforms
             # Drop feats to be on the safe side.
             train = K2SpeechRecognitionDataset(
                 cut_transforms=transforms,
