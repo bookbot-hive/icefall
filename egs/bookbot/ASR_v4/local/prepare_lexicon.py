@@ -62,20 +62,21 @@ def prepare_lexicon(manifests_dir: str, lang_dir: str):
 
     phones = set()
 
-    # supervisions_train = Path(manifests_dir) / "bookbot_supervisions_train.jsonl.gz"
+    supervisions_train = Path(manifests_dir).rglob("*_supervisions_train*.jsonl.gz")
     lexicon = Path(lang_dir) / "lexicon.txt"
 
-    logging.info(f"Loading {supervisions_train}!")
-    with gzip.open(supervisions_train, "r") as load_f:
-        for line in load_f.readlines():
-            load_dict = json.loads(line)
-            text = load_dict["text"]
-            # list the phone units and filter the empty item
-            phones_list = list(filter(None, text.split()))
+    for supervision in supervisions_train:
+        logging.info(f"Loading {supervision}!")
+        with gzip.open(supervision, "r") as load_f:
+            for line in load_f.readlines():
+                load_dict = json.loads(line)
+                text = load_dict["text"]
+                # list the phone units and filter the empty item
+                phones_list = list(filter(None, text.split()))
 
-            for phone in phones_list:
-                if phone not in phones:
-                    phones.add(phone)
+                for phone in phones_list:
+                    if phone not in phones:
+                        phones.add(phone)
 
     with open(lexicon, "w") as f:
         for phone in sorted(phones):
