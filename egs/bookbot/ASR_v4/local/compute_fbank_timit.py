@@ -34,6 +34,8 @@ from lhotse.recipes.utils import read_manifests_if_cached
 
 from icefall.utils import get_executor
 
+from .augment_cuts import augment_cuts
+
 # Torch's multithreaded behavior needs to be disabled or
 # it wastes a lot of CPU and slow things down.
 # Do this outside of main() in case it needs to take effect
@@ -82,6 +84,7 @@ def compute_fbank_timit():
                 recordings=m["recordings"],
                 supervisions=m["supervisions"],
             )
+            cut_set = augment_cuts(cut_set)
             cut_set = cut_set.compute_and_store_features(
                 extractor=extractor,
                 storage_path=f"{output_dir}/{prefix}_feats_{partition}",
