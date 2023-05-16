@@ -934,12 +934,16 @@ def main():
 
     test_cuts_libri = multidataset.test_cuts_libri()
     test_cuts_timit = multidataset.test_cuts_timit()
+    test_cuts_austalk = multidataset.test_cuts_austalk()
+    test_cuts_sccw = multidataset.test_cuts_sccw()
 
     test_dl_libri = asr_data_module.test_dataloaders(test_cuts_libri)
     test_dl_timit = asr_data_module.test_dataloaders(test_cuts_timit)
+    test_dl_austalk = asr_data_module.test_dataloaders(test_cuts_austalk)
+    test_dl_sccw = asr_data_module.test_dataloaders(test_cuts_sccw)
 
-    test_sets = ["test-libriphone", "test-timit"]
-    test_dl = [test_dl_libri, test_dl_timit]
+    test_sets = ["test-libriphone", "test-timit", "test-austalk", "test-sccw"]
+    test_dl = [test_dl_libri, test_dl_timit, test_dl_austalk, test_dl_sccw]
 
     for test_set, test_dl in zip(test_sets, test_dl):
         results_dict = decode_dataset(

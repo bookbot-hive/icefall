@@ -99,8 +99,28 @@ class MultiDataset:
         logging.info("About to get TIMIT test cuts")
 
         logging.info("Loading TIMIT in lazy mode")
-        libriphone_cuts = load_manifest_lazy(
-            self.manifest_dir / "timit_cuts_test.jsonl.gz"
+        timit_cuts = load_manifest_lazy(self.manifest_dir / "timit_cuts_test.jsonl.gz")
+
+        return timit_cuts
+
+    @lru_cache()
+    def test_cuts_austalk(self) -> CutSet:
+        logging.info("About to get AusTalk test cuts")
+
+        logging.info("Loading AusTalk in lazy mode")
+        austalk_cuts = load_manifest_lazy(
+            self.manifest_dir / "austalk_words_mq_cuts_test.jsonl.gz"
         )
 
-        return libriphone_cuts
+        return austalk_cuts
+
+    @lru_cache()
+    def test_cuts_sccw(self) -> CutSet:
+        logging.info("About to get SC-CW test cuts")
+
+        logging.info("Loading SC-CW in lazy mode")
+        sccw_cuts = load_manifest_lazy(
+            self.manifest_dir / "sc_cw_children_cuts_test.jsonl.gz"
+        )
+
+        return sccw_cuts

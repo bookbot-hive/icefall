@@ -45,6 +45,14 @@ if [ $stage -le 0 ] && [ $stop_stage -ge 0 ]; then
     lhotse download bookbot-huggingface bookbot/bookbot_en_phonemes $dl_dir
   fi
 
+  if [ ! -d $dl_dir/austalk_words_mq ]; then
+    lhotse download bookbot-huggingface bookbot/austalk_words_mq $dl_dir
+  fi
+
+  if [ ! -d $dl_dir/sc_cw_children ]; then
+    lhotse download bookbot-huggingface bookbot/sc_cw_children $dl_dir
+  fi
+
   if [ ! -d $dl_dir/musan ]; then
     lhotse download musan $dl_dir
   fi
@@ -58,6 +66,8 @@ if [ $stage -le 1 ] && [ $stop_stage -ge 1 ]; then
   lhotse prepare bookbot-huggingface $dl_dir/libriphone data/manifests
   lhotse prepare bookbot-huggingface $dl_dir/common-voice-13_0-en-v1 data/manifests
   lhotse prepare bookbot-huggingface $dl_dir/bookbot_en_phonemes data/manifests
+  lhotse prepare bookbot-huggingface $dl_dir/austalk_words_mq data/manifests
+  lhotse prepare bookbot-huggingface $dl_dir/sc_cw_children data/manifests
   lhotse prepare musan $dl_dir/musan data/manifests
 fi
 
@@ -69,6 +79,8 @@ if [ $stage -le 2 ] && [ $stop_stage -ge 2 ]; then
   ./local/compute_fbank_libriphone.py
   ./local/compute_fbank_commonvoice.py
   ./local/compute_fbank_bookbot.py
+  ./local/compute_fbank_austalk.py
+  ./local/compute_fbank_sccw.py
   ./local/compute_fbank_musan.py
 fi
 

@@ -81,7 +81,8 @@ def compute_fbank_bookbot():
                 recordings=m["recordings"],
                 supervisions=m["supervisions"],
             )
-            cut_set = augment_cuts(cut_set)
+            if partition == "train":
+                cut_set = augment_cuts(cut_set)
             cut_set = cut_set.compute_and_store_features(
                 extractor=extractor,
                 storage_path=f"{output_dir}/{prefix}_feats_{partition}",

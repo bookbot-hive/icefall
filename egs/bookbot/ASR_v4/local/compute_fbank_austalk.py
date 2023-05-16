@@ -18,7 +18,7 @@
 
 
 """
-This file computes fbank features of the LibriPhone dataset.
+This file computes fbank features of the AusTalk dataset.
 It looks for manifests in the directory data/manifests.
 
 The generated fbank features are saved in data/fbank.
@@ -34,8 +34,6 @@ from lhotse.recipes.utils import read_manifests_if_cached
 
 from icefall.utils import get_executor
 
-from augment_cuts import augment_cuts
-
 # Torch's multithreaded behavior needs to be disabled or
 # it wastes a lot of CPU and slow things down.
 # Do this outside of main() in case it needs to take effect
@@ -44,18 +42,14 @@ torch.set_num_threads(1)
 torch.set_num_interop_threads(1)
 
 
-def compute_fbank_libriphone():
+def compute_fbank_austalk():
     src_dir = Path("data/manifests")
     output_dir = Path("data/fbank")
     num_jobs = min(15, os.cpu_count())
     num_mel_bins = 80
 
-    dataset_parts = (
-        "train.clean",
-        "dev",
-        "test",
-    )
-    prefix = "libriphone"
+    dataset_parts = ("test",)
+    prefix = "austalk_words_mq"
     suffix = "jsonl.gz"
     manifests = read_manifests_if_cached(
         dataset_parts=dataset_parts,
@@ -85,8 +79,6 @@ def compute_fbank_libriphone():
                 recordings=m["recordings"],
                 supervisions=m["supervisions"],
             )
-            if partition == "train.clean":
-                cut_set = augment_cuts(cut_set)
             cut_set = cut_set.compute_and_store_features(
                 extractor=extractor,
                 storage_path=f"{output_dir}/{prefix}_feats_{partition}",
@@ -103,4 +95,4 @@ if __name__ == "__main__":
 
     logging.basicConfig(format=formatter, level=logging.INFO)
 
-    compute_fbank_libriphone()
+    compute_fbank_austalk()
