@@ -30,8 +30,10 @@ class MultiDataset:
             It is expected to contain the following files:
 
             - timit_cuts_train.jsonl.gz
+            - timit_cuts_test.jsonl.gz
             - libriphone_cuts_train.clean.jsonl.gz
             - libriphone_cuts_dev.jsonl.gz
+            - libriphone_cuts_test.jsonl.gz
             - common-voice-13_0-en-v1_cuts_train.jsonl.gz
             - bookbot_en_phonemes_cuts_train.jsonl.gz
         """
@@ -72,11 +74,33 @@ class MultiDataset:
 
     @lru_cache()
     def valid_cuts(self) -> CutSet:
-        logging.info("About to get LibriPhone valid cuts")
+        logging.info("About to get LibriPhone dev cuts")
 
         logging.info("Loading LibriPhone in lazy mode")
         libriphone_cuts = load_manifest_lazy(
             self.manifest_dir / "libriphone_cuts_dev.jsonl.gz"
+        )
+
+        return libriphone_cuts
+
+    @lru_cache()
+    def test_cuts_libri(self) -> CutSet:
+        logging.info("About to get LibriPhone test cuts")
+
+        logging.info("Loading LibriPhone in lazy mode")
+        libriphone_cuts = load_manifest_lazy(
+            self.manifest_dir / "libriphone_cuts_test.jsonl.gz"
+        )
+
+        return libriphone_cuts
+
+    @lru_cache()
+    def test_cuts_timit(self) -> CutSet:
+        logging.info("About to get TIMIT test cuts")
+
+        logging.info("Loading TIMIT in lazy mode")
+        libriphone_cuts = load_manifest_lazy(
+            self.manifest_dir / "timit_cuts_test.jsonl.gz"
         )
 
         return libriphone_cuts
