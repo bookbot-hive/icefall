@@ -930,8 +930,10 @@ def main():
     args.return_cuts = True
     asr_data_module = AsrDataModule(args)
 
-    test_cuts_libri = MultiDataset.test_cuts_libri()
-    test_cuts_timit = MultiDataset.test_cuts_timit()
+    multidataset = MultiDataset(params.manifest_dir)
+
+    test_cuts_libri = multidataset.test_cuts_libri()
+    test_cuts_timit = multidataset.test_cuts_timit()
 
     test_dl_libri = asr_data_module.test_dataloaders(test_cuts_libri)
     test_dl_timit = asr_data_module.test_dataloaders(test_cuts_timit)
