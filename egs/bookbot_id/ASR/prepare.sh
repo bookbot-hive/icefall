@@ -38,7 +38,7 @@ if [ $stage -le 0 ] && [ $stop_stage -ge 0 ]; then
   fi
 
   if [ ! -d $dl_dir/fleurs ]; then
-    lhotse download bookbot/fleurs-id $dl_dir
+    lhotse download bookbot-huggingface bookbot/fleurs-id $dl_dir
   fi
 
   if [ ! -d $dl_dir/bookbot_id_phonemes ]; then
