@@ -989,6 +989,7 @@ def run(rank, world_size, args):
     train_dl = asr_data_module.train_dataloaders(train_cuts)
 
     valid_cuts = multidataset.valid_cuts()
+    valid_cuts = valid_cuts.filter(remove_short_and_long_utt)
     valid_dl = asr_data_module.valid_dataloaders(valid_cuts)
 
     if not params.print_diagnostics:
