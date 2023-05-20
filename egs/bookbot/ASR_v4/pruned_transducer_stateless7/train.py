@@ -1063,14 +1063,14 @@ def run(rank, world_size, args):
         tokens = c.supervisions[0].text.split()
 
         if T < len(tokens):
-            logging.warning(
-                f"Exclude cut with ID {c.id} from training. "
-                f"Number of frames (before subsampling): {c.num_frames}. "
-                f"Number of frames (after subsampling): {T}. "
-                f"Text: {c.supervisions[0].text}. "
-                f"Tokens: {tokens}. "
-                f"Number of tokens: {len(tokens)}"
-            )
+            # logging.warning(
+            #     f"Exclude cut with ID {c.id} from training. "
+            #     f"Number of frames (before subsampling): {c.num_frames}. "
+            #     f"Number of frames (after subsampling): {T}. "
+            #     f"Text: {c.supervisions[0].text}. "
+            #     f"Tokens: {tokens}. "
+            #     f"Number of tokens: {len(tokens)}"
+            # )
             return False
 
         return True
