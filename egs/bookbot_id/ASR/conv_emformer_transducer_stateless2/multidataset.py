@@ -37,6 +37,8 @@ class MultiDataset:
             - common-voice-13_0-id_cuts_train.jsonl.gz
             - common-voice-13_0-id_cuts_validation.jsonl.gz
             - common-voice-13_0-id_cuts_test.jsonl.gz
+            - magichub-indocsc_cuts_train.jsonl.gz
+            - magichub-sindodusc_cuts_train.jsonl.gz
             - bookbot_id_phonemes_cuts_train.jsonl.gz
             - bookbot_id_phonemes_cuts_validation.jsonl.gz
             - bookbot_id_phonemes_cuts_test.jsonl.gz
@@ -64,6 +66,18 @@ class MultiDataset:
             self.manifest_dir / "common-voice-13_0-id_cuts_train.jsonl.gz"
         )
 
+        # IndoCSC
+        logging.info("Loading IndoCSC in lazy mode")
+        indocsc_cuts = load_manifest_lazy(
+            self.manifest_dir / "magichub-indocsc_cuts_train.jsonl.gz"
+        )
+
+        # SIndoDUSC
+        logging.info("Loading SIndoDUSC in lazy mode")
+        sindodusc_cuts = load_manifest_lazy(
+            self.manifest_dir / "magichub-sindodusc_cuts_train.jsonl.gz"
+        )
+
         # Bookbot
         logging.info("Loading Bookbot in lazy mode")
         bookbot_cuts = load_manifest_lazy(
@@ -74,8 +88,10 @@ class MultiDataset:
             fleurs_cuts,
             librivox_cuts,
             commonvoice_cuts,
+            indocsc_cuts,
+            sindodusc_cuts,
             bookbot_cuts,
-            weights=[0.015, 0.03, 0.025, 0.93],
+            weights=[0.014, 0.03, 0.028, 0.013, 0.015, 0.9],
         )
 
     @lru_cache()

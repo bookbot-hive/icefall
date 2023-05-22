@@ -45,6 +45,14 @@ if [ $stage -le 0 ] && [ $stop_stage -ge 0 ]; then
     lhotse download bookbot-huggingface bookbot/bookbot_id_phonemes $dl_dir
   fi
 
+  if [ ! -d $dl_dir/magichub-indocsc ]; then
+    lhotse download bookbot-huggingface bookbot/magichub-indocsc $dl_dir
+  fi
+
+  if [ ! -d $dl_dir/magichub-sindodusc ]; then
+    lhotse download bookbot-huggingface bookbot/magichub-sindodusc $dl_dir
+  fi
+
   if [ ! -d $dl_dir/musan ]; then
     lhotse download musan $dl_dir
   fi
@@ -58,6 +66,8 @@ if [ $stage -le 1 ] && [ $stop_stage -ge 1 ]; then
   lhotse prepare bookbot-huggingface $dl_dir/common-voice-13_0-id data/manifests
   lhotse prepare bookbot-huggingface $dl_dir/fleurs-id data/manifests
   lhotse prepare bookbot-huggingface $dl_dir/bookbot_id_phonemes data/manifests
+  lhotse prepare bookbot-huggingface $dl_dir/magichub-indocsc data/manifests
+  lhotse prepare bookbot-huggingface $dl_dir/magichub-sindodusc data/manifests
   lhotse prepare musan $dl_dir/musan data/manifests
 fi
 
@@ -68,6 +78,8 @@ if [ $stage -le 2 ] && [ $stop_stage -ge 2 ]; then
   ./local/compute_fbank_librivox.py
   ./local/compute_fbank_commonvoice.py
   ./local/compute_fbank_fleurs.py
+  ./local/compute_fbank_indocsc.py
+  ./local/compute_fbank_sindodusc.py
   ./local/compute_fbank_bookbot.py
   ./local/compute_fbank_musan.py
 fi
