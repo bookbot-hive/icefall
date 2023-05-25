@@ -56,6 +56,10 @@ if [ $stage -le 0 ] && [ $stop_stage -ge 0 ]; then
   if [ ! -d $dl_dir/musan ]; then
     lhotse download musan $dl_dir
   fi
+
+  if [ ! -d $dl_dir/audio_splits ]; then
+    lhotse download hallway $dl_dir
+  fi
 fi
 
 if [ $stage -le 1 ] && [ $stop_stage -ge 1 ]; then
@@ -69,6 +73,7 @@ if [ $stage -le 1 ] && [ $stop_stage -ge 1 ]; then
   lhotse prepare bookbot-huggingface $dl_dir/magichub-indocsc data/manifests
   lhotse prepare bookbot-huggingface $dl_dir/magichub-sindodusc data/manifests
   lhotse prepare musan $dl_dir/musan data/manifests
+  lhotse prepare hallway $dl_dir/audio_splits data/manifests
 fi
 
 if [ $stage -le 2 ] && [ $stop_stage -ge 2 ]; then
@@ -82,6 +87,7 @@ if [ $stage -le 2 ] && [ $stop_stage -ge 2 ]; then
   ./local/compute_fbank_sindodusc.py
   ./local/compute_fbank_bookbot.py
   ./local/compute_fbank_musan.py
+  ./local/compute_fbank_hallway.py
 fi
 
 if [ $stage -le 3 ] && [ $stop_stage -ge 3 ]; then
