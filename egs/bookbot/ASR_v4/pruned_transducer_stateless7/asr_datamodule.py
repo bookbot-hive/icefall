@@ -219,9 +219,16 @@ class AsrDataModule:
             logging.info("Enable MUSAN")
             logging.info("About to get Musan cuts")
             cuts_musan = load_manifest(self.args.manifest_dir / "musan_cuts.jsonl.gz")
-            transforms.append(
-                CutMix(cuts=cuts_musan, prob=0.5, snr=(10, 20), preserve_id=True)
+            logging.info("About to get Hallway noise cuts")
+            cuts_hallway_noise = load_manifest(
+                self.args.manifest_dir / "hallway_cuts_noise.jsonl.gz"
             )
+            transforms += [
+                CutMix(cuts=cuts_musan, prob=0.5, snr=(10, 20), preserve_id=True),
+                CutMix(
+                    cuts=cuts_hallway_noise, prob=0.7, snr=(10, 20), preserve_id=True
+                ),
+            ]
         else:
             logging.info("Disable MUSAN")
 
