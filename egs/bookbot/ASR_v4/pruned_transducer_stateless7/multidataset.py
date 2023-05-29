@@ -69,7 +69,7 @@ class MultiDataset:
             libriphone_cuts,
             commonvoice_cuts,
             bookbot_cuts,
-            weights=[0.03, 0.2, 0.57, 0.2],
+            weights=[0.05, 0.24, 0.53, 0.18],
         )
 
     @lru_cache()
