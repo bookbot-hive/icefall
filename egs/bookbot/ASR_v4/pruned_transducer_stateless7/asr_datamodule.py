@@ -21,6 +21,7 @@ import inspect
 import logging
 from functools import lru_cache
 from pathlib import Path
+from random import choice
 from typing import Any, Dict, Optional
 
 import torch
@@ -223,12 +224,13 @@ class AsrDataModule:
             cuts_hallway_noise = load_manifest(
                 self.args.manifest_dir / "hallway_cuts_noise.jsonl.gz"
             )
-            transforms += [
+            noise = [
                 CutMix(cuts=cuts_musan, prob=0.5, snr=(10, 20), preserve_id=True),
                 CutMix(
-                    cuts=cuts_hallway_noise, prob=0.7, snr=(10, 20), preserve_id=True
-                ),
+                    cuts=cuts_hallway_noise, prob=0.5, snr=(10, 20), preserve_id=True
+                )
             ]
+            transforms += [choice(noise)]
         else:
             logging.info("Disable MUSAN")
 
