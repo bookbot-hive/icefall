@@ -53,6 +53,14 @@ if [ $stage -le 0 ] && [ $stop_stage -ge 0 ]; then
     lhotse download bookbot-huggingface bookbot/sc_cw_children $dl_dir
   fi
 
+  if [ ! -d $dl_dir/l2-arctic ]; then
+    lhotse download bookbot-huggingface bookbot/l2-arctic $dl_dir
+  fi
+
+  if [ ! -d $dl_dir/speechocean762 ]; then
+    lhotse download bookbot-huggingface bookbot/speechocean762 $dl_dir
+  fi
+
   if [ ! -d $dl_dir/musan ]; then
     lhotse download musan $dl_dir
   fi
@@ -72,6 +80,8 @@ if [ $stage -le 1 ] && [ $stop_stage -ge 1 ]; then
   lhotse prepare bookbot-huggingface $dl_dir/bookbot_en_phonemes data/manifests
   lhotse prepare bookbot-huggingface $dl_dir/austalk_words_mq data/manifests
   lhotse prepare bookbot-huggingface $dl_dir/sc_cw_children data/manifests
+  lhotse prepare bookbot-huggingface $dl_dir/l2-arctic data/manifests
+  lhotse prepare bookbot-huggingface $dl_dir/speechocean762 data/manifests
   lhotse prepare musan $dl_dir/musan data/manifests
   lhotse prepare hallway $dl_dir/audio_splits data/manifests
 fi
@@ -86,6 +96,8 @@ if [ $stage -le 2 ] && [ $stop_stage -ge 2 ]; then
   ./local/compute_fbank_bookbot.py
   ./local/compute_fbank_austalk.py
   ./local/compute_fbank_sccw.py
+  ./local/compute_fbank_l2.py
+  ./local/compute_fbank_speechocean.py
   ./local/compute_fbank_musan.py
   ./local/compute_fbank_hallway.py
 fi

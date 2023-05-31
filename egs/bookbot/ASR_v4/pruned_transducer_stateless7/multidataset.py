@@ -36,6 +36,10 @@ class MultiDataset:
             - libriphone_cuts_test.jsonl.gz
             - common-voice-13_0-en-v1_cuts_train.jsonl.gz
             - bookbot_en_phonemes_cuts_train.jsonl.gz
+            - austalk_words_mq_cuts_test.jsonl.gz
+            - sc_cw_children_cuts_test.jsonl.gz
+            - l2-arctic_cuts_test.jsonl.gz
+            - speechocean762_cuts_test.jsonl.gz
         """
         self.manifest_dir = Path(manifest_dir)
 
@@ -124,3 +128,25 @@ class MultiDataset:
         )
 
         return sccw_cuts
+
+    @lru_cache()
+    def test_cuts_l2a(self) -> CutSet:
+        logging.info("About to get L2 Arctic test cuts")
+
+        logging.info("Loading L2 Arctic in lazy mode")
+        l2a_cuts = load_manifest_lazy(
+            self.manifest_dir / "l2-arctic_cuts_test.jsonl.gz"
+        )
+
+        return l2a_cuts
+
+    @lru_cache()
+    def test_cuts_speechocean(self) -> CutSet:
+        logging.info("About to get SpeechOcean test cuts")
+
+        logging.info("Loading SpeechOcean in lazy mode")
+        speechocean_cuts = load_manifest_lazy(
+            self.manifest_dir / "speechocean762_cuts_test.jsonl.gz"
+        )
+
+        return speechocean_cuts

@@ -940,9 +940,26 @@ def main():
     test_cuts_timit = multidataset.test_cuts_timit()
     test_cuts_austalk = multidataset.test_cuts_austalk()
     test_cuts_sccw = multidataset.test_cuts_sccw()
+    test_cuts_l2a = multidataset.test_cuts_l2a()
+    test_cuts_speechocean = multidataset.test_cuts_speechocean()
 
-    test_sets = ["test-libriphone", "test-timit", "test-austalk", "test-sccw"]
-    test_cuts = [test_cuts_libri, test_cuts_timit, test_cuts_austalk, test_cuts_sccw]
+    test_sets = [
+        "test-libriphone",
+        "test-timit",
+        "test-austalk",
+        "test-sccw",
+        "test-l2a",
+        "test-speechocean",
+    ]
+
+    test_cuts = [
+        test_cuts_libri,
+        test_cuts_timit,
+        test_cuts_austalk,
+        test_cuts_sccw,
+        test_cuts_l2a,
+        test_cuts_speechocean,
+    ]
 
     for test_set, test_cut in zip(test_sets, test_cuts):
         results_dict = decode_dataset(
