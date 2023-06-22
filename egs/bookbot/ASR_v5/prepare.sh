@@ -61,9 +61,9 @@ if [ $stage -le 0 ] && [ $stop_stage -ge 0 ]; then
     lhotse download bookbot-huggingface bookbot/common-voice-accent-ca $dl_dir sentence ""
   fi
 
-  # if [ ! -d $dl_dir/bookbot_en_phonemes ]; then
-  #   lhotse download bookbot-huggingface bookbot/bookbot_en_phonemes $dl_dir
-  # fi
+  if [ ! -d $dl_dir/bookbot_en_v1-v2 ]; then
+    lhotse download bookbot-huggingface bookbot/bookbot_en_v1-v2 $dl_dir text ""
+  fi
 
   # if [ ! -d $dl_dir/austalk_words_mq ]; then
   #   lhotse download bookbot-huggingface bookbot/austalk_words_mq $dl_dir
@@ -102,7 +102,7 @@ if [ $stage -le 1 ] && [ $stop_stage -ge 1 ]; then
   lhotse prepare bookbot-huggingface $dl_dir/common-voice-accent-nz data/manifests --normalize-words=true
   lhotse prepare bookbot-huggingface $dl_dir/common-voice-accent-in data/manifests --normalize-words=true
   lhotse prepare bookbot-huggingface $dl_dir/common-voice-accent-cas data/manifests --normalize-words=true
-  # lhotse prepare bookbot-huggingface $dl_dir/bookbot_en_phonemes data/manifests
+  lhotse prepare bookbot-huggingface $dl_dir/bookbot_en_phonemes data/manifests --normalize-words=true
   # lhotse prepare bookbot-huggingface $dl_dir/austalk_words_mq data/manifests
   # lhotse prepare bookbot-huggingface $dl_dir/sc_cw_children data/manifests
   # lhotse prepare bookbot-huggingface $dl_dir/l2-arctic data/manifests
@@ -115,16 +115,16 @@ if [ $stage -le 2 ] && [ $stop_stage -ge 2 ]; then
   log "Stage 2: Compute fbanks"
   mkdir -p data/fbank
 
-  # ./local/compute_fbank_timit.py
+  ./local/compute_fbank_timit.py
   ./local/compute_fbank_libriphone.py
-  # ./local/compute_fbank_commonvoice.py
-  # ./local/compute_fbank_bookbot.py
+  ./local/compute_fbank_commonvoice_accented.py
+  ./local/compute_fbank_bookbot.py
   # ./local/compute_fbank_austalk.py
   # ./local/compute_fbank_sccw.py
   # ./local/compute_fbank_l2.py
   # ./local/compute_fbank_speechocean.py
   ./local/compute_fbank_musan.py
-  # ./local/compute_fbank_hallway.py
+  ./local/compute_fbank_hallway.py
 fi
 
 if [ $stage -le 3 ] && [ $stop_stage -ge 3 ]; then
