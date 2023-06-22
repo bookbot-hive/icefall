@@ -29,17 +29,37 @@ log "dl_dir: $dl_dir"
 if [ $stage -le 0 ] && [ $stop_stage -ge 0 ]; then
   log "Stage 0: Download data"
 
-  # if [ ! -d $dl_dir/timit ]; then
-  #   lhotse download bookbot-huggingface bookbot/timit $dl_dir
-  # fi
+  if [ ! -d $dl_dir/timit ]; then
+    lhotse download bookbot-huggingface bookbot/timit $dl_dir text ""
+  fi
 
   if [ ! -d $dl_dir/libriphone ]; then
     lhotse download bookbot-huggingface bookbot/libriphone $dl_dir text ""
   fi
 
-  # if [ ! -d $dl_dir/common-voice-13_0-en-v1 ]; then
-  #   lhotse download bookbot-huggingface bookbot/common-voice-13_0-en-v1 $dl_dir
-  # fi
+  if [ ! -d $dl_dir/common-voice-accent-us ]; then
+    lhotse download bookbot-huggingface bookbot/common-voice-accent-us $dl_dir
+  fi
+
+  if [ ! -d $dl_dir/common-voice-accent-gb ]; then
+    lhotse download bookbot-huggingface bookbot/common-voice-accent-gb $dl_dir
+  fi
+
+  if [ ! -d $dl_dir/common-voice-accent-au ]; then
+    lhotse download bookbot-huggingface bookbot/common-voice-accent-au $dl_dir
+  fi
+
+  if [ ! -d $dl_dir/common-voice-accent-nz ]; then
+    lhotse download bookbot-huggingface bookbot/common-voice-accent-nz $dl_dir
+  fi
+
+  if [ ! -d $dl_dir/common-voice-accent-in ]; then
+    lhotse download bookbot-huggingface bookbot/common-voice-accent-in $dl_dir
+  fi
+
+  if [ ! -d $dl_dir/common-voice-accent-ca ]; then
+    lhotse download bookbot-huggingface bookbot/common-voice-accent-ca $dl_dir
+  fi
 
   # if [ ! -d $dl_dir/bookbot_en_phonemes ]; then
   #   lhotse download bookbot-huggingface bookbot/bookbot_en_phonemes $dl_dir
@@ -65,25 +85,30 @@ if [ $stage -le 0 ] && [ $stop_stage -ge 0 ]; then
     lhotse download musan $dl_dir
   fi
 
-  # if [ ! -d $dl_dir/audio_splits ]; then
-  #   lhotse download hallway $dl_dir
-  # fi
+  if [ ! -d $dl_dir/audio_splits ]; then
+    lhotse download hallway $dl_dir
+  fi
 fi
 
 if [ $stage -le 1 ] && [ $stop_stage -ge 1 ]; then
   log "Stage 1: Prepare manifests"
   mkdir -p data/manifests
 
-  # lhotse prepare bookbot-huggingface $dl_dir/timit data/manifests
+  lhotse prepare bookbot-huggingface $dl_dir/timit data/manifests --normalize-words=true
   lhotse prepare bookbot-huggingface $dl_dir/libriphone data/manifests --normalize-words=true
-  # lhotse prepare bookbot-huggingface $dl_dir/common-voice-13_0-en-v1 data/manifests
+  lhotse prepare bookbot-huggingface $dl_dir/common-voice-accent-us data/manifests --normalize-words=true
+  lhotse prepare bookbot-huggingface $dl_dir/common-voice-accent-gb data/manifests --normalize-words=true
+  lhotse prepare bookbot-huggingface $dl_dir/common-voice-accent-au data/manifests --normalize-words=true
+  lhotse prepare bookbot-huggingface $dl_dir/common-voice-accent-nz data/manifests --normalize-words=true
+  lhotse prepare bookbot-huggingface $dl_dir/common-voice-accent-in data/manifests --normalize-words=true
+  lhotse prepare bookbot-huggingface $dl_dir/common-voice-accent-cas data/manifests --normalize-words=true
   # lhotse prepare bookbot-huggingface $dl_dir/bookbot_en_phonemes data/manifests
   # lhotse prepare bookbot-huggingface $dl_dir/austalk_words_mq data/manifests
   # lhotse prepare bookbot-huggingface $dl_dir/sc_cw_children data/manifests
   # lhotse prepare bookbot-huggingface $dl_dir/l2-arctic data/manifests
   # lhotse prepare bookbot-huggingface $dl_dir/speechocean762 data/manifests
   lhotse prepare musan $dl_dir/musan data/manifests
-  # lhotse prepare hallway $dl_dir/audio_splits data/manifests
+  lhotse prepare hallway $dl_dir/audio_splits data/manifests
 fi
 
 if [ $stage -le 2 ] && [ $stop_stage -ge 2 ]; then
