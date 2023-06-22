@@ -111,7 +111,7 @@ if [ $stage -le 1 ] && [ $stop_stage -ge 1 ]; then
   lhotse prepare bookbot-huggingface $dl_dir/common-voice-accent-nz data/manifests --normalize-words=true
   lhotse prepare bookbot-huggingface $dl_dir/common-voice-accent-in data/manifests --normalize-words=true
   lhotse prepare bookbot-huggingface $dl_dir/common-voice-accent-ca data/manifests --normalize-words=true
-  lhotse prepare bookbot-huggingface $dl_dir/bookbot_en_phonemes data/manifests --normalize-words=true
+  lhotse prepare bookbot-huggingface $dl_dir/bookbot_en_v1-v2 data/manifests --normalize-words=true
   # lhotse prepare bookbot-huggingface $dl_dir/austalk_words_mq data/manifests
   # lhotse prepare bookbot-huggingface $dl_dir/sc_cw_children data/manifests
   # lhotse prepare bookbot-huggingface $dl_dir/l2-arctic data/manifests
