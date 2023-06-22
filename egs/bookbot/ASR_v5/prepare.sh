@@ -34,7 +34,7 @@ if [ $stage -le 0 ] && [ $stop_stage -ge 0 ]; then
   # fi
 
   if [ ! -d $dl_dir/libriphone ]; then
-    lhotse download bookbot-huggingface bookbot/libriphone $dl_dir
+    lhotse download bookbot-huggingface bookbot/libriphone $dl_dir text ""
   fi
 
   # if [ ! -d $dl_dir/common-voice-13_0-en-v1 ]; then
@@ -75,7 +75,7 @@ if [ $stage -le 1 ] && [ $stop_stage -ge 1 ]; then
   mkdir -p data/manifests
 
   # lhotse prepare bookbot-huggingface $dl_dir/timit data/manifests
-  lhotse prepare bookbot-huggingface $dl_dir/libriphone data/manifests
+  lhotse prepare bookbot-huggingface $dl_dir/libriphone data/manifests normalize_phonemes=true
   # lhotse prepare bookbot-huggingface $dl_dir/common-voice-13_0-en-v1 data/manifests
   # lhotse prepare bookbot-huggingface $dl_dir/bookbot_en_phonemes data/manifests
   # lhotse prepare bookbot-huggingface $dl_dir/austalk_words_mq data/manifests
