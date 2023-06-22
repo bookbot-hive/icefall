@@ -25,6 +25,15 @@ log() {
 
 log "dl_dir: $dl_dir"
 
+if [ $stage -le -1 ] && [ $stop_stage -ge -1 ]; then
+  log "Stage -1: Download LM"
+  # We assume that you have installed the git-lfs, if not, you could install it
+  # using: `sudo apt-get install git-lfs && git-lfs install`
+  [ ! -e $dl_dir/lm ] && mkdir -p $dl_dir/lm
+
+  git clone https://huggingface.co/bookbot/bookbot_en_kaldilm $dl_dir/lm
+  cd $dl_dir/lm && git lfs pull
+fi
 
 if [ $stage -le 0 ] && [ $stop_stage -ge 0 ]; then
   log "Stage 0: Download data"
@@ -101,7 +110,7 @@ if [ $stage -le 1 ] && [ $stop_stage -ge 1 ]; then
   lhotse prepare bookbot-huggingface $dl_dir/common-voice-accent-au data/manifests --normalize-words=true
   lhotse prepare bookbot-huggingface $dl_dir/common-voice-accent-nz data/manifests --normalize-words=true
   lhotse prepare bookbot-huggingface $dl_dir/common-voice-accent-in data/manifests --normalize-words=true
-  lhotse prepare bookbot-huggingface $dl_dir/common-voice-accent-cas data/manifests --normalize-words=true
+  lhotse prepare bookbot-huggingface $dl_dir/common-voice-accent-ca data/manifests --normalize-words=true
   lhotse prepare bookbot-huggingface $dl_dir/bookbot_en_phonemes data/manifests --normalize-words=true
   # lhotse prepare bookbot-huggingface $dl_dir/austalk_words_mq data/manifests
   # lhotse prepare bookbot-huggingface $dl_dir/sc_cw_children data/manifests
@@ -132,9 +141,8 @@ if [ $stage -le 3 ] && [ $stop_stage -ge 3 ]; then
   lang_dir=data/lang_phone
   mkdir -p $lang_dir
 
-  (echo '!SIL SIL'; echo '<SPOKEN_NOISE> SPN'; echo '<UNK> SPN'; ) |
-  # TODO: check format
-    cat - $dl_dir/lm/librispeech-lexicon.txt |
+  (echo '!SIL	SIL'; echo '<SPOKEN_NOISE>	SPN'; echo '<UNK>	SPN'; ) |
+    cat - $dl_dir/lm/lexicon.tsv |
     sort | uniq > $lang_dir/lexicon.txt
 
   if [ ! -f $lang_dir/L_disambig.pt ]; then
@@ -156,4 +164,35 @@ if [ $stage -le 3 ] && [ $stop_stage -ge 3 ]; then
       $lang_dir/L_disambig.pt \
       $lang_dir/L_disambig.fst
   fi
+fi
+
+if [ $stage -le 4 ] && [ $stop_stage -ge 4 ]; then
+  log "Stage 4: Prepare G"
+  # We assume you have install kaldilm, if not, please install
+  # it using: pip install kaldilm
+
+  mkdir -p data/lm
+  if [ ! -f data/lm/G_3_gram.fst.txt ]; then
+    # It is used in building HLG
+    python3 -m kaldilm \
+      --read-symbol-table="data/lang_phone/words.txt" \
+      --disambig-symbol='#0' \
+      --max-order=3 \
+      $dl_dir/lm/3-gram.arpa > data/lm/G_3_gram.fst.txt
+  fi
+
+  if [ ! -f data/lm/G_4_gram.fst.txt ]; then
+    # It is used for LM rescoring
+    python3 -m kaldilm \
+      --read-symbol-table="data/lang_phone/words.txt" \
+      --disambig-symbol='#0' \
+      --max-order=4 \
+      $dl_dir/lm/4-gram.arpa > data/lm/G_4_gram.fst.txt
+  fi
+fi
+
+# Compile LG for RNN-T fast_beam_search decoding
+if [ $stage -le 5 ] && [ $stop_stage -ge 5 ]; then
+  log "Stage 5: Compile LG"
+  ./local/compile_lg.py --lang-dir data/lang_phone
 fi
