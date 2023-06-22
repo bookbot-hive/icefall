@@ -75,7 +75,7 @@ if [ $stage -le 1 ] && [ $stop_stage -ge 1 ]; then
   mkdir -p data/manifests
 
   # lhotse prepare bookbot-huggingface $dl_dir/timit data/manifests
-  lhotse prepare bookbot-huggingface $dl_dir/libriphone data/manifests normalize_phonemes=true
+  lhotse prepare bookbot-huggingface $dl_dir/libriphone data/manifests --normalize_phonemes=true
   # lhotse prepare bookbot-huggingface $dl_dir/common-voice-13_0-en-v1 data/manifests
   # lhotse prepare bookbot-huggingface $dl_dir/bookbot_en_phonemes data/manifests
   # lhotse prepare bookbot-huggingface $dl_dir/austalk_words_mq data/manifests
