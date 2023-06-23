@@ -1108,7 +1108,7 @@ def run(rank, world_size, args):
         device = torch.device("cuda", rank)
     logging.info(f"Device: {device}")
 
-    pl = UniqLexicon(params.lang_dir, uniq_filename="lexicon.txt")
+    pl = UniqLexicon(params.lang_dir)
     params.blank_id = 0
     params.vocab_size = max(pl.tokens) + 1
 

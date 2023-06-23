@@ -144,6 +144,10 @@ if [ $stage -le 3 ] && [ $stop_stage -ge 3 ]; then
   (echo '!SIL	SIL'; echo '<SPOKEN_NOISE>	SPN'; echo '<UNK>	SPN'; ) |
     cat - $dl_dir/lm/lexicon.tsv |
     sort | uniq > $lang_dir/lexicon.txt
+  
+  if [ ! -f $lang_dir/uniq_lexicon.txt ]; then
+    ./local/generate_unique_lexicon.py --lang-dir $lang_dir
+  fi
 
   if [ ! -f $lang_dir/L_disambig.pt ]; then
     ./local/prepare_lang.py --lang-dir $lang_dir
