@@ -191,8 +191,13 @@ if [ $stage -le 4 ] && [ $stop_stage -ge 4 ]; then
   fi
 fi
 
-# Compile LG for RNN-T fast_beam_search decoding
 if [ $stage -le 5 ] && [ $stop_stage -ge 5 ]; then
-  log "Stage 5: Compile LG"
+  log "Stage 5: Compile HLG"
+  ./local/compile_hlg.py --lang-dir data/lang_phone
+fi
+
+# Compile LG for RNN-T fast_beam_search decoding
+if [ $stage -le 6 ] && [ $stop_stage -ge 6 ]; then
+  log "Stage 6: Compile LG"
   ./local/compile_lg.py --lang-dir data/lang_phone
 fi
