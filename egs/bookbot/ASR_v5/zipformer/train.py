@@ -1183,9 +1183,9 @@ def run(rank, world_size, args):
         # an utterance duration distribution for your dataset to select
         # the threshold
         if c.duration < 1.0 or c.duration > 20.0:
-            # logging.warning(
-            #     f"Exclude cut with ID {c.id} from training. Duration: {c.duration}"
-            # )
+            logging.warning(
+                f"Exclude cut with ID {c.id} from training. Duration: {c.duration}"
+            )
             return False
 
         # In pruned RNN-T, we require that T >= S
@@ -1195,16 +1195,16 @@ def run(rank, world_size, args):
         # In ./zipformer.py, the conv module uses the following expression
         # for subsampling
         T = ((c.num_frames - 7) // 2 + 1) // 2
-        tokens = c.supervisions[0].text.split()
+        token_ids = pl.texts_to_token_ids(c.supervisions[0].text).tolist()[0]
 
-        if T < len(tokens):
+        if T < len(token_ids):
             logging.warning(
                 f"Exclude cut with ID {c.id} from training. "
                 f"Number of frames (before subsampling): {c.num_frames}. "
                 f"Number of frames (after subsampling): {T}. "
                 f"Text: {c.supervisions[0].text}. "
-                f"Tokens: {tokens}. "
-                f"Number of tokens: {len(tokens)}"
+                f"Tokens: {token_ids}. "
+                f"Number of tokens: {len(token_ids)}"
             )
             return False
 
@@ -1224,6 +1224,7 @@ def run(rank, world_size, args):
     )
 
     valid_cuts = multidataset.valid_cuts()
+    valid_cuts = valid_cuts.filter(remove_short_and_long_utt)
     valid_dl = asr_data_module.valid_dataloaders(valid_cuts)
 
     if not params.print_diagnostics:
