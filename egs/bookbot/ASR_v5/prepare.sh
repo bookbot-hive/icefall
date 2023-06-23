@@ -178,7 +178,7 @@ if [ $stage -le 4 ] && [ $stop_stage -ge 4 ]; then
       --read-symbol-table="data/lang_phone/words.txt" \
       --disambig-symbol='#0' \
       --max-order=3 \
-      $dl_dir/lm/3-gram.arpa > data/lm/G_3_gram.fst.txt
+      $dl_dir/lm/lm_3_gram.arpa > data/lm/G_3_gram.fst.txt
   fi
 
   if [ ! -f data/lm/G_4_gram.fst.txt ]; then
@@ -187,7 +187,7 @@ if [ $stage -le 4 ] && [ $stop_stage -ge 4 ]; then
       --read-symbol-table="data/lang_phone/words.txt" \
       --disambig-symbol='#0' \
       --max-order=4 \
-      $dl_dir/lm/4-gram.arpa > data/lm/G_4_gram.fst.txt
+      $dl_dir/lm/lm_4_gram.arpa > data/lm/G_4_gram.fst.txt
   fi
 fi
 
