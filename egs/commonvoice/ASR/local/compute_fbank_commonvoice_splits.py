@@ -30,6 +30,8 @@ from lhotse import (
     set_caching_enabled,
 )
 
+from icefall.utils import str2bool
+
 # Torch's multithreaded behavior needs to be disabled or
 # it wastes a lot of CPU and slow things down.
 # Do this outside of main() in case it needs to take effect
@@ -83,6 +85,13 @@ def get_args():
         help="Stop processing pieces until this number (exclusive).",
     )
 
+    parser.add_argument(
+        "--perturb-speed",
+        type=str2bool,
+        default=True,
+        help="""Perturb speed with factor 0.9 and 1.1 on train subset.""",
+    )
+
     return parser.parse_args()
 
 
@@ -129,6 +138,10 @@ def compute_fbank_commonvoice_splits(args):
         cut_set = cut_set.trim_to_supervisions(
             keep_overlapping=False, min_duration=None
         )
+
+        if args.perturb_speed:
+            logging.info("Doing speed perturb")
+            cut_set = cut_set + cut_set.perturb_speed(0.9) + cut_set.perturb_speed(1.1)
 
         logging.info("Computing features")
         cut_set = cut_set.compute_and_store_features_batch(
