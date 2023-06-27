@@ -733,7 +733,7 @@ def main():
     pl = UniqLexicon(params.lang_dir)
 
     params.blank_id = pl.token_table["<eps>"]
-    params.unk_id = pl.token_table["<UNK>"]
+    params.unk_id = pl.token_table["SPN"]
     params.vocab_size = max(pl.tokens) + 1
 
     logging.info(params)
