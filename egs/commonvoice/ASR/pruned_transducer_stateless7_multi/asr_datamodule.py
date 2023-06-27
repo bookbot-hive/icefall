@@ -429,18 +429,17 @@ class AsrDataModule:
 
     @lru_cache()
     def valid_cuts(self) -> CutSet:
-        logging.info("About to get multidataset valid cuts")
+        logging.info("About to get multidataset dev cuts")
 
-        logging.info("Loading FLEURS Valid Manifest in lazy mode")
+        logging.info("Loading FLEURS Dev Manifest in lazy mode")
         fleurs_cuts = load_manifest_lazy(
             self.args.fleurs_manifest_dir
             / f"fleurs-{self.args.language_fleurs}_cuts_dev.jsonl.gz"
         )
 
-        logging.info("Loading CommonVoice Valid Manifest in lazy mode")
+        logging.info("Loading CommonVoice Dev Manifest in lazy mode")
         commonvoice_cuts = load_manifest_lazy(
-            self.args.cv_manifest_dir
-            / f"cv-{self.args.language}_cuts_validation.jsonl.gz"
+            self.args.cv_manifest_dir / f"cv-{self.args.language}_cuts_dev.jsonl.gz"
         )
 
         return CutSet.mux(fleurs_cuts, commonvoice_cuts)
