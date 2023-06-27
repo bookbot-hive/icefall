@@ -2,7 +2,6 @@
 #
 # Copyright 2023 Xiaomi Corporation (Author: Fangjun Kuang,
 #                                            Yifan   Yang)
-
 """
 This script exports a transducer model from PyTorch to ONNX.
 

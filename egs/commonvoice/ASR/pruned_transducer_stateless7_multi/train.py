@@ -63,7 +63,6 @@ from lhotse.cut import Cut
 from lhotse.dataset.sampling.base import CutSampler
 from lhotse.utils import fix_random_seed
 from model import Transducer
-from multidataset import MultiDataset
 from optim import Eden, ScaledAdam
 from torch import Tensor
 from torch.cuda.amp import GradScaler
@@ -1029,9 +1028,8 @@ def run(rank, world_size, args):
         register_inf_check_hooks(model)
 
     asr_data_module = AsrDataModule(args)
-
-    multidataset = MultiDataset(params.manifest_dir)
-    train_cuts = multidataset.train_cuts()
+    train_cuts = asr_data_module.train_cuts()
+    valid_cuts = asr_data_module.valid_cuts()
 
     def remove_short_and_long_utt(c: Cut):
         # Keep only utterances with duration between 1 second and 20 seconds
@@ -1072,17 +1070,7 @@ def run(rank, world_size, args):
 
     train_cuts = train_cuts.filter(remove_short_and_long_utt)
     train_dl = asr_data_module.train_dataloaders(train_cuts)
-    # if params.start_batch > 0 and checkpoints and "sampler" in checkpoints:
-    #     # We only load the sampler's state dict when it loads a checkpoint
-    #     # saved in the middle of an epoch
-    #     sampler_state_dict = checkpoints["sampler"]
-    # else:
-    #     sampler_state_dict = None
-
-    # train_dl = commonvoice.train_dataloaders(
-    #     train_cuts, sampler_state_dict=sampler_state_dict
-    # )
-    valid_cuts = multidataset.valid_cuts()
+    
     valid_cuts = valid_cuts.filter(remove_short_and_long_utt)
     valid_dl = asr_data_module.valid_dataloaders(valid_cuts)
 

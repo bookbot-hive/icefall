@@ -155,7 +155,7 @@ from beam_search import (
     modified_beam_search_LODR,
     modified_beam_search_ngram_rescoring,
 )
-from multidataset import MultiDataset
+
 from train import add_model_arguments, get_params, get_transducer_model
 
 from icefall import LmScorer, NgramLm
@@ -927,9 +927,8 @@ def main():
     # we need cut ids to display recognition results.
     args.return_cuts = True
     asr_data_module = AsrDataModule(args)
-    multidataset = MultiDataset(params.manifest_dir)
-    test_cuts_fleurs = multidataset.test_cuts_fleurs()
-    test_cuts_commonvoice = multidataset.test_cuts_commonvoice()    
+    test_cuts_fleurs = asr_data_module.test_cuts_fleurs()
+    test_cuts_commonvoice = asr_data_module.test_cuts_commonvoice()    
     test_dl_fleurs = asr_data_module.test_dataloaders(test_cuts_fleurs)
     test_dl_commonvoice = asr_data_module.test_dataloaders(test_cuts_commonvoice)   
     

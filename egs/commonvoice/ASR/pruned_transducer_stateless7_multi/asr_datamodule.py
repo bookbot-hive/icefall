@@ -385,5 +385,64 @@ class AsrDataModule:
             num_workers=self.args.num_workers,
         )
         return test_dl
+    
+    @lru_cache()
+    def train_cuts(self) -> CutSet:
+        logging.info("About to get multidataset train cuts")
+        
+        logging.info("Loading Fleurs Train Manifest in lazy mode")
+        fleurs_cuts = load_manifest_lazy(
+            self.manifest_dir / f"fleurs-{self.args.language}_cuts_train.jsonl.gz"
+        )
+
+        logging.info("Loading CommonVoice Train Manifest in lazy mode")
+        commonvoice_cuts = load_manifest_lazy(
+            self.args.cv_manifest_dir / f"cv-{self.args.language}_cuts_train.jsonl.gz"
+        )
+        
+        return CutSet.mux(
+            fleurs_cuts,
+            commonvoice_cuts,
+            weights=[0.5, 0.5]
+        )
+
+    @lru_cache()
+    def valid_cuts(self) -> CutSet:
+        logging.info("About to get multidataset valid cuts")
+        
+        logging.info("Loading Fleurs Valid Manifest in lazy mode")
+        fleurs_cuts = load_manifest_lazy(
+            self.manifest_dir / f"fleurs-{self.args.language}_cuts_validation.jsonl.gz"
+        )
+        
+        logging.info("Loading CommonVoice Valid Manifest in lazy mode")
+        commonvoice_cuts = load_manifest_lazy(
+            self.args.cv_manifest_dir / f"cv-{self.args.language}_cuts_validation.jsonl.gz"
+        )
+        
+        return CutSet.mux(fleurs_cuts, commonvoice_cuts)
+
+    @lru_cache()
+    def test_cuts_fleurs(self) -> CutSet:
+        logging.info("About to get Fleurs test cuts")
+
+        logging.info("Loading Fleurs Test Manifest in lazy mode")
+        fleurs_cuts = load_manifest_lazy(
+            self.manifest_dir / f"fleurs-{self.args.language}_cuts_test.jsonl.gz"
+        )
+
+        return fleurs_cuts
+
+    @lru_cache()
+    def test_cuts_commonvoice(self) -> CutSet:
+        logging.info("About to get CommonVoice test cuts")
+
+        logging.info("Loading CommonVoice Test Manifest in lazy mode")
+        commonvoice_cuts = load_manifest_lazy(
+            self.manifest_dir / f"cv-{self.args.language}_cuts_test.jsonl.gz"
+        )
+
+        return commonvoice_cuts
+
 
 
