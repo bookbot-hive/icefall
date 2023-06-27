@@ -133,5 +133,6 @@ if __name__ == "__main__":
     formatter = "%(asctime)s %(levelname)s [%(filename)s:%(lineno)d] %(message)s"
 
     logging.basicConfig(format=formatter, level=logging.INFO)
-
-    compute_fbank_fleurs()
+    args = get_args()
+    logging.info(vars(args))
+    compute_fbank_fleurs(args)
