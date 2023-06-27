@@ -601,7 +601,7 @@ def decode_dataset(
         decode_stream.set_features(feature, tail_pad_len=30)
 
         token_ids = pl.texts_to_token_ids([cut.supervisions[0].text]).tolist()[0]
-        ground_truth = [str(i) for i in token_ids]
+        ground_truth = [pl.token_table[t] for t in token_ids]
         decode_stream.ground_truth = ground_truth
 
         decode_streams.append(decode_stream)
@@ -841,8 +841,6 @@ def main():
 
     num_param = sum([p.numel() for p in model.parameters()])
     logging.info(f"Number of model parameters: {num_param}")
-
-    asr_data_module = AsrDataModule(args)
 
     multidataset = MultiDataset(params.manifest_dir)
 
