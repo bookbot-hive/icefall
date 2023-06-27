@@ -72,7 +72,7 @@ def compute_fbank_fleurs(args):
 
     dataset_parts = (
         "train",
-        "validation",
+        "dev",
         "test",
     )
     prefix = f"fleurs-{language}"
