@@ -29,7 +29,7 @@ from lhotse import combine, load_manifest_lazy
 
 
 def main():
-    filenames = Path("./data/*/fbank/").rglob("*_cuts_train*.jsonl.gz")
+    filenames = Path("./data/").rglob("*/fbank/*_cuts_train*.jsonl.gz")
 
     cuts = combine(load_manifest_lazy(p) for p in filenames)
     cuts.describe()
@@ -37,3 +37,22 @@ def main():
 
 if __name__ == "__main__":
     main()
+
+"""
+## train
+Cuts count: 27901
+Total duration (hh:mm:ss): 58:45:22
+Speech duration (hours): 58:45:22 (100.0%)
+***
+Duration statistics (seconds):
+mean    7.6
+std     4.2
+min     2.0
+25%     4.8
+50%     6.3
+75%     8.8
+99%     22.0
+99.5%   24.5
+99.9%   30.3
+max     48.7
+"""
