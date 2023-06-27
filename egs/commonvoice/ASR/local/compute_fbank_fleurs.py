@@ -64,18 +64,18 @@ def get_args():
 
 
 def compute_fbank_fleurs(args):
+    language = args.language
     src_dir = Path("data/manifests")
-    output_dir = Path("data/fbank")
+    output_dir = Path(f"data/{language}/fbank")
     num_jobs = min(15, os.cpu_count())
     num_mel_bins = 80
-    language = args.language
 
     dataset_parts = (
         "train",
         "validation",
         "test",
     )
-    prefix = f"fleurs/{language}"
+    prefix = f"fleurs-{language}"
     suffix = "jsonl.gz"
     manifests = read_manifests_if_cached(
         dataset_parts=dataset_parts,
@@ -100,12 +100,6 @@ def compute_fbank_fleurs(args):
             if cuts_file.is_file():
                 logging.info(f"{partition} already exists - skipping.")
                 continue
-
-            if args.perturb_speed:
-                logging.info("Doing speed perturb")
-                cut_set = (
-                    cut_set + cut_set.perturb_speed(0.9) + cut_set.perturb_speed(1.1)
-                )
 
             logging.info(f"Processing {partition}")
             cut_set = CutSet.from_manifests(
