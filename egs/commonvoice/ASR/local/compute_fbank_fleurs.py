@@ -34,6 +34,7 @@ from lhotse import CutSet, Fbank, FbankConfig, LilcomChunkyWriter
 from lhotse.recipes.utils import read_manifests_if_cached
 
 from icefall.utils import get_executor
+from icefall.utils import str2bool
 
 from augment_cuts import augment_cuts
 
@@ -53,21 +54,31 @@ def get_args():
         help="""Language of Fleurs""",
     )
 
+    
+    parser.add_argument(
+        "--perturb-speed",
+        type=str2bool,
+        default=False,
+        help="""Perturb speed with factor 0.9 and 1.1 on train subset.""",
+    )
+
+    
     return parser.parse_args()
 
 
-def compute_fbank_fleurs(language: str):
+def compute_fbank_fleurs(args):
     src_dir = Path("data/manifests")
     output_dir = Path("data/fbank")
     num_jobs = min(15, os.cpu_count())
     num_mel_bins = 80
+    language = args.language
 
     dataset_parts = (
         "train",
         "validation",
         "test",
     )
-    prefix = f"fleurs-{language}"
+    prefix = f"fleurs/{language}"
     suffix = "jsonl.gz"
     manifests = read_manifests_if_cached(
         dataset_parts=dataset_parts,
@@ -92,6 +103,11 @@ def compute_fbank_fleurs(language: str):
             if cuts_file.is_file():
                 logging.info(f"{partition} already exists - skipping.")
                 continue
+            
+            if args.perturb_speed:
+                logging.info("Doing speed perturb")
+                cut_set = cut_set + cut_set.perturb_speed(0.9) + cut_set.perturb_speed(1.1)
+            
             logging.info(f"Processing {partition}")
             cut_set = CutSet.from_manifests(
                 recordings=m["recordings"],

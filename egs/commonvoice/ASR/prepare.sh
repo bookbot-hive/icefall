@@ -37,7 +37,8 @@ num_splits=1000
 
 dl_dir=$PWD/download
 release=cv-corpus-13.0-2023-03-09
-lang=en
+lang=id
+lang_fleurs=id_id
 
 . shared/parse_options.sh || exit 1
 
@@ -91,7 +92,14 @@ if [ $stage -le 0 ] && [ $stop_stage -ge 0 ]; then
   if [ ! -d $dl_dir/musan ]; then
     lhotse download musan $dl_dir
   fi
+
+  if [ ! -d $dl_dir/fleurs/$lang ]; then
+    lhotse download fleurs --languages $lang_fleurs $dl_dir
+  fi
 fi
+
+
+
 
 if [ $stage -le 1 ] && [ $stop_stage -ge 1 ]; then
   log "Stage 1: Prepare CommonVoice manifest"
@@ -104,8 +112,20 @@ if [ $stage -le 1 ] && [ $stop_stage -ge 1 ]; then
   fi
 fi
 
+
 if [ $stage -le 2 ] && [ $stop_stage -ge 2 ]; then
-  log "Stage 2: Prepare musan manifest"
+  log "Stage 2: Prepare FLEURS manifest"
+  # We assume that you have downloaded the FLEURS corpus
+  # to $dl_dir
+  mkdir -p data/manifests
+  if [ ! -e data/manifests/.fleurs.done ]; then
+    lhotse prepare fleurs --language $lang_fleurs $dl_dir/fleurs data/manifests
+    touch data/manifests/.fleurs.done
+  fi
+fi
+
+if [ $stage -le 3 ] && [ $stop_stage -ge 3 ]; then
+  log "Stage 3: Prepare musan manifest"
   # We assume that you have downloaded the musan corpus
   # to data/musan
   mkdir -p data/manifests
@@ -115,16 +135,16 @@ if [ $stage -le 2 ] && [ $stop_stage -ge 2 ]; then
   fi
 fi
 
-if [ $stage -le 3 ] && [ $stop_stage -ge 3 ]; then
-  log "Stage 3: Preprocess CommonVoice manifest"
+if [ $stage -le 4 ] && [ $stop_stage -ge 4 ]; then
+  log "Stage 4: Preprocess CommonVoice manifest"
   if [ ! -e data/${lang}/fbank/.preprocess_complete ]; then
     ./local/preprocess_commonvoice.py  --language $lang
     touch data/${lang}/fbank/.preprocess_complete
   fi
 fi
 
-if [ $stage -le 4 ] && [ $stop_stage -ge 4 ]; then
-  log "Stage 4: Compute fbank for dev and test subsets of CommonVoice"
+if [ $stage -le 5 ] && [ $stop_stage -ge 5 ]; then
+  log "Stage 5: Compute fbank for dev and test subsets of CommonVoice"
   mkdir -p data/${lang}/fbank
   if [ ! -e data/${lang}/fbank/.cv-${lang}_dev_test.done ]; then
     ./local/compute_fbank_commonvoice_dev_test.py --language $lang
@@ -132,8 +152,9 @@ if [ $stage -le 4 ] && [ $stop_stage -ge 4 ]; then
   fi
 fi
 
-if [ $stage -le 5 ] && [ $stop_stage -ge 5 ]; then
-  log "Stage 5: Split train subset into ${num_splits} pieces"
+
+if [ $stage -le 6 ] && [ $stop_stage -ge 6 ]; then
+  log "Stage 6: Split train subset into ${num_splits} pieces"
   split_dir=data/${lang}/fbank/cv-${lang}_train_split_${num_splits}
   if [ ! -e $split_dir/.cv-${lang}_train_split.done ]; then
     lhotse split $num_splits ./data/${lang}/fbank/cv-${lang}_cuts_train_raw.jsonl.gz $split_dir
@@ -141,8 +162,8 @@ if [ $stage -le 5 ] && [ $stop_stage -ge 5 ]; then
   fi
 fi
 
-if [ $stage -le 6 ] && [ $stop_stage -ge 6 ]; then
-  log "Stage 6: Compute features for train subset of CommonVoice"
+if [ $stage -le 7 ] && [ $stop_stage -ge 7 ]; then
+  log "Stage 7: Compute features for train subset of CommonVoice"
   if [ ! -e data/${lang}/fbank/.cv-${lang}_train.done ]; then
     ./local/compute_fbank_commonvoice_splits.py \
       --num-workers $nj \
@@ -154,16 +175,25 @@ if [ $stage -le 6 ] && [ $stop_stage -ge 6 ]; then
   fi
 fi
 
-if [ $stage -le 7 ] && [ $stop_stage -ge 7 ]; then
-  log "Stage 7: Combine features for train"
+if [ $stage -le 8 ] && [ $stop_stage -ge 8 ]; then
+  log "Stage 8: Compute fbank for FLEURS"
+  mkdir -p data/${lang_fleurs}/fbank
+  if [ ! -e data/${lang_fleurs}/fbank/.fleurs.done ]; then
+    ./local/compute_fbank_fleurs.py --language $lang_fleurs
+    touch data/fbank/.fleurs.done
+  fi
+fi
+
+if [ $stage -le 9 ] && [ $stop_stage -ge 9 ]; then
+  log "Stage 9: Combine features for train"
   if [ ! -f data/${lang}/fbank/cv-${lang}_cuts_train.jsonl.gz ]; then
     pieces=$(find data/${lang}/fbank/cv-${lang}_train_split_${num_splits} -name "cv-${lang}_cuts_train.*.jsonl.gz")
     lhotse combine $pieces data/${lang}/fbank/cv-${lang}_cuts_train.jsonl.gz
   fi
 fi
 
-if [ $stage -le 8 ] && [ $stop_stage -ge 8 ]; then
-  log "Stage 8: Compute fbank for musan"
+if [ $stage -le 10 ] && [ $stop_stage -ge 10 ]; then
+  log "Stage 10: Compute fbank for musan"
   mkdir -p data/fbank
   if [ ! -e data/fbank/.musan.done ]; then
     ./local/compute_fbank_musan.py
@@ -171,8 +201,8 @@ if [ $stage -le 8 ] && [ $stop_stage -ge 8 ]; then
   fi
 fi
 
-if [ $stage -le 9 ] && [ $stop_stage -ge 9 ]; then
-  log "Stage 9: Prepare BPE based lang"
+if [ $stage -le 11 ] && [ $stop_stage -ge 11 ]; then
+  log "Stage 10: Prepare BPE based lang"
 
   for vocab_size in ${vocab_sizes[@]}; do
     lang_dir=data/${lang}/lang_bpe_${vocab_size}
