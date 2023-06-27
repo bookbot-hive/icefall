@@ -36,14 +36,13 @@ from lhotse.recipes.utils import read_manifests_if_cached
 from icefall.utils import get_executor
 from icefall.utils import str2bool
 
-from augment_cuts import augment_cuts
-
 # Torch's multithreaded behavior needs to be disabled or
 # it wastes a lot of CPU and slow things down.
 # Do this outside of main() in case it needs to take effect
 # even when we are not invoking the main (e.g. when spawning subprocesses).
 torch.set_num_threads(1)
 torch.set_num_interop_threads(1)
+
 
 def get_args():
     parser = argparse.ArgumentParser()
@@ -54,7 +53,6 @@ def get_args():
         help="""Language of Fleurs""",
     )
 
-    
     parser.add_argument(
         "--perturb-speed",
         type=str2bool,
@@ -62,7 +60,6 @@ def get_args():
         help="""Perturb speed with factor 0.9 and 1.1 on train subset.""",
     )
 
-    
     return parser.parse_args()
 
 
@@ -103,18 +100,24 @@ def compute_fbank_fleurs(args):
             if cuts_file.is_file():
                 logging.info(f"{partition} already exists - skipping.")
                 continue
-            
+
             if args.perturb_speed:
                 logging.info("Doing speed perturb")
-                cut_set = cut_set + cut_set.perturb_speed(0.9) + cut_set.perturb_speed(1.1)
-            
+                cut_set = (
+                    cut_set + cut_set.perturb_speed(0.9) + cut_set.perturb_speed(1.1)
+                )
+
             logging.info(f"Processing {partition}")
             cut_set = CutSet.from_manifests(
                 recordings=m["recordings"],
                 supervisions=m["supervisions"],
             )
-            if partition == "train":
-                cut_set = augment_cuts(cut_set)
+            if args.perturb_speed and partition == "train":
+                logging.info("Doing speed perturb")
+                cut_set = (
+                    cut_set + cut_set.perturb_speed(0.9) + cut_set.perturb_speed(1.1)
+                )
+
             cut_set = cut_set.compute_and_store_features(
                 extractor=extractor,
                 storage_path=f"{output_dir}/{prefix}_feats_{partition}",

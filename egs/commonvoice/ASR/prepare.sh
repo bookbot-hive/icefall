@@ -93,7 +93,7 @@ if [ $stage -le 0 ] && [ $stop_stage -ge 0 ]; then
     lhotse download musan $dl_dir
   fi
 
-  if [ ! -d $dl_dir/fleurs/$lang ]; then
+  if [ ! -d $dl_dir/fleurs/$lang_fleurs ]; then
     lhotse download fleurs --languages $lang_fleurs $dl_dir
   fi
 fi
