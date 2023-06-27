@@ -82,6 +82,30 @@ class AsrDataModule:
             "augmentations, etc.",
         )
         group.add_argument(
+            "--language",
+            type=str,
+            default="en",
+            help="""Language of Common Voice""",
+        )
+        group.add_argument(
+            "--cv-manifest-dir",
+            type=Path,
+            default=Path("data/en/fbank"),
+            help="Path to directory with CommonVoice train/dev/test cuts.",
+        )
+        group.add_argument(
+            "--language_fleurs",
+            type=str,
+            default="en",
+            help="""Language of FLEURS""",
+        )
+        group.add_argument(
+            "--fleurs-manifest-dir",
+            type=Path,
+            default=Path("data/en/fbank"),
+            help="Path to directory with FLEURS train/dev/test cuts.",
+        )
+        group.add_argument(
             "--manifest-dir",
             type=Path,
             default=Path("data/fbank"),
