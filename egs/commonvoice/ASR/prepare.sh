@@ -98,9 +98,6 @@ if [ $stage -le 0 ] && [ $stop_stage -ge 0 ]; then
   fi
 fi
 
-
-
-
 if [ $stage -le 1 ] && [ $stop_stage -ge 1 ]; then
   log "Stage 1: Prepare CommonVoice manifest"
   # We assume that you have downloaded the CommonVoice corpus
@@ -111,7 +108,6 @@ if [ $stage -le 1 ] && [ $stop_stage -ge 1 ]; then
     touch data/${lang}/manifests/.cv-${lang}.done
   fi
 fi
-
 
 if [ $stage -le 2 ] && [ $stop_stage -ge 2 ]; then
   log "Stage 2: Prepare FLEURS manifest"
@@ -151,7 +147,6 @@ if [ $stage -le 5 ] && [ $stop_stage -ge 5 ]; then
     touch data/${lang}/fbank/.cv-${lang}_dev_test.done
   fi
 fi
-
 
 if [ $stage -le 6 ] && [ $stop_stage -ge 6 ]; then
   log "Stage 6: Split train subset into ${num_splits} pieces"
@@ -202,7 +197,7 @@ if [ $stage -le 10 ] && [ $stop_stage -ge 10 ]; then
 fi
 
 if [ $stage -le 11 ] && [ $stop_stage -ge 11 ]; then
-  log "Stage 10: Prepare BPE based lang"
+  log "Stage 11: Prepare BPE based lang"
 
   for vocab_size in ${vocab_sizes[@]}; do
     lang_dir=data/${lang}/lang_bpe_${vocab_size}
