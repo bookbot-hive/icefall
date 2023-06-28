@@ -8,7 +8,7 @@ stop_stage=100
 
 # Split data/${lang}set to this number of pieces
 # This is to avoid OOM during feature extraction.
-num_splits=1000
+num_splits=10
 
 # We assume dl_dir (download dir) contains the following
 # directories and files. If not, they will be downloaded
@@ -134,7 +134,7 @@ fi
 if [ $stage -le 4 ] && [ $stop_stage -ge 4 ]; then
   log "Stage 4: Preprocess CommonVoice manifest"
   if [ ! -e data/${lang}/fbank/.preprocess_complete ]; then
-    ./local/preprocess_commonvoice.py  --language $lang
+    ./local/preprocess_commonvoice.py  --language $lang_fleurs
     touch data/${lang}/fbank/.preprocess_complete
   fi
 fi
@@ -173,7 +173,8 @@ if [ $stage -le 8 ] && [ $stop_stage -ge 8 ]; then
       --batch-duration 600 \
       --start 0 \
       --num-splits $num_splits \
-      --language $lang
+      --language $lang \
+      --perturb_speed true
     touch data/${lang}/fbank/.cv-${lang}_train.done
   fi
 fi
@@ -181,7 +182,7 @@ fi
 if [ $stage -le 9 ] && [ $stop_stage -ge 9 ]; then
   log "Stage 9: Compute fbank for FLEURS"
   if [ ! -e data/${lang_fleurs}/fbank/.fleurs.done ]; then
-    ./local/compute_fbank_fleurs.py --language $lang_fleurs
+    ./local/compute_fbank_fleurs.py --language $lang_fleurs --perturb_speed true
     touch data/fbank/.fleurs.done
   fi
 fi
