@@ -140,7 +140,15 @@ if [ $stage -le 4 ] && [ $stop_stage -ge 4 ]; then
 fi
 
 if [ $stage -le 5 ] && [ $stop_stage -ge 5 ]; then
-  log "Stage 5: Compute fbank for dev and test subsets of CommonVoice"
+  log "Stage 5: Preprocess Fleurs manifest"
+  if [ ! -e data/${lang_fleurs}/fbank/.preprocess_complete ]; then
+    ./local/preprocess_flleurs.py  --language $lang
+    touch data/${lang_fleurs}/fbank/.preprocess_complete
+  fi
+fi
+
+if [ $stage -le 6 ] && [ $stop_stage -ge 6 ]; then
+  log "Stage 6: Compute fbank for dev and test subsets of CommonVoice"
   mkdir -p data/${lang}/fbank
   if [ ! -e data/${lang}/fbank/.cv-${lang}_dev_test.done ]; then
     ./local/compute_fbank_commonvoice_dev_test.py --language $lang
@@ -148,8 +156,8 @@ if [ $stage -le 5 ] && [ $stop_stage -ge 5 ]; then
   fi
 fi
 
-if [ $stage -le 6 ] && [ $stop_stage -ge 6 ]; then
-  log "Stage 6: Split train subset into ${num_splits} pieces"
+if [ $stage -le 7 ] && [ $stop_stage -ge 7 ]; then
+  log "Stage 7: Split train subset into ${num_splits} pieces"
   split_dir=data/${lang}/fbank/cv-${lang}_train_split_${num_splits}
   if [ ! -e $split_dir/.cv-${lang}_train_split.done ]; then
     lhotse split $num_splits ./data/${lang}/fbank/cv-${lang}_cuts_train_raw.jsonl.gz $split_dir
@@ -157,8 +165,8 @@ if [ $stage -le 6 ] && [ $stop_stage -ge 6 ]; then
   fi
 fi
 
-if [ $stage -le 7 ] && [ $stop_stage -ge 7 ]; then
-  log "Stage 7: Compute features for train subset of CommonVoice"
+if [ $stage -le 8 ] && [ $stop_stage -ge 8 ]; then
+  log "Stage 8: Compute features for train subset of CommonVoice"
   if [ ! -e data/${lang}/fbank/.cv-${lang}_train.done ]; then
     ./local/compute_fbank_commonvoice_splits.py \
       --num-workers $nj \
@@ -170,25 +178,24 @@ if [ $stage -le 7 ] && [ $stop_stage -ge 7 ]; then
   fi
 fi
 
-if [ $stage -le 8 ] && [ $stop_stage -ge 8 ]; then
-  log "Stage 8: Compute fbank for FLEURS"
-  mkdir -p data/${lang_fleurs}/fbank
+if [ $stage -le 9 ] && [ $stop_stage -ge 9 ]; then
+  log "Stage 9: Compute fbank for FLEURS"
   if [ ! -e data/${lang_fleurs}/fbank/.fleurs.done ]; then
     ./local/compute_fbank_fleurs.py --language $lang_fleurs
     touch data/fbank/.fleurs.done
   fi
 fi
 
-if [ $stage -le 9 ] && [ $stop_stage -ge 9 ]; then
-  log "Stage 9: Combine features for train"
+if [ $stage -le 10 ] && [ $stop_stage -ge 10 ]; then
+  log "Stage 10: Combine features for train"
   if [ ! -f data/${lang}/fbank/cv-${lang}_cuts_train.jsonl.gz ]; then
     pieces=$(find data/${lang}/fbank/cv-${lang}_train_split_${num_splits} -name "cv-${lang}_cuts_train.*.jsonl.gz")
     lhotse combine $pieces data/${lang}/fbank/cv-${lang}_cuts_train.jsonl.gz
   fi
 fi
 
-if [ $stage -le 10 ] && [ $stop_stage -ge 10 ]; then
-  log "Stage 10: Compute fbank for musan"
+if [ $stage -le 11 ] && [ $stop_stage -ge 11 ]; then
+  log "Stage 11: Compute fbank for musan"
   mkdir -p data/fbank
   if [ ! -e data/fbank/.musan.done ]; then
     ./local/compute_fbank_musan.py
@@ -196,8 +203,8 @@ if [ $stage -le 10 ] && [ $stop_stage -ge 10 ]; then
   fi
 fi
 
-if [ $stage -le 11 ] && [ $stop_stage -ge 11 ]; then
-  log "Stage 11: Prepare BPE based lang"
+if [ $stage -le 12 ] && [ $stop_stage -ge 12 ]; then
+  log "Stage 12: Prepare BPE based lang"
 
   for vocab_size in ${vocab_sizes[@]}; do
     lang_dir=data/${lang}/lang_bpe_${vocab_size}
