@@ -183,7 +183,7 @@ if [ $stage -le 9 ] && [ $stop_stage -ge 9 ]; then
   log "Stage 9: Compute fbank for FLEURS"
   if [ ! -e data/${lang_fleurs}/fbank/.fleurs.done ]; then
     ./local/compute_fbank_fleurs.py --language $lang_fleurs --perturb-speed true
-    touch data/fbank/.fleurs.done
+    touch data/${lang_fleurs}/fbank/.fleurs.done
   fi
 fi
 
