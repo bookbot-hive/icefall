@@ -140,7 +140,7 @@ if [ $stage -le 4 ] && [ $stop_stage -ge 4 ]; then
 fi
 
 if [ $stage -le 5 ] && [ $stop_stage -ge 5 ]; then
-  log "Stage 5: Preprocess Fleurs manifest"
+  log "Stage 5: Preprocess FLEURS manifest"
   if [ ! -e data/${lang_fleurs}/fbank/.preprocess_complete ]; then
     ./local/preprocess_flleurs.py  --language $lang
     touch data/${lang_fleurs}/fbank/.preprocess_complete
