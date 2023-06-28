@@ -65,7 +65,7 @@ def get_args():
 
 def compute_fbank_fleurs(args):
     language = args.language
-    src_dir = Path("data/manifests")
+    src_dir = Path(f"data/{language}/manifests")
     output_dir = Path(f"data/{language}/fbank")
     num_jobs = min(15, os.cpu_count())
     num_mel_bins = 80

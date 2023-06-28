@@ -115,7 +115,7 @@ if [ $stage -le 2 ] && [ $stop_stage -ge 2 ]; then
   # to $dl_dir
   mkdir -p data/manifests
   if [ ! -e data/manifests/.fleurs.done ]; then
-    lhotse prepare fleurs --language $lang_fleurs $dl_dir/fleurs data/manifests
+    lhotse prepare fleurs --language $lang_fleurs $dl_dir/fleurs data/${lang_fleurs}/manifests
     touch data/manifests/.fleurs.done
   fi
 fi
