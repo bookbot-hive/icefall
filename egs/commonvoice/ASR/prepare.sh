@@ -114,9 +114,9 @@ if [ $stage -le 2 ] && [ $stop_stage -ge 2 ]; then
   # We assume that you have downloaded the FLEURS corpus
   # to $dl_dir
   mkdir -p data/manifests
-  if [ ! -e data/manifests/.fleurs.done ]; then
+  if [ ! -e data/${lang_fleurs}/manifests/.fleurs.done ]; then
     lhotse prepare fleurs --language $lang_fleurs $dl_dir/fleurs data/${lang_fleurs}/manifests
-    touch data/manifests/.fleurs.done
+    touch data/${lang_fleurs}/manifests/.fleurs.done
   fi
 fi
 
@@ -134,7 +134,7 @@ fi
 if [ $stage -le 4 ] && [ $stop_stage -ge 4 ]; then
   log "Stage 4: Preprocess CommonVoice manifest"
   if [ ! -e data/${lang}/fbank/.preprocess_complete ]; then
-    ./local/preprocess_commonvoice.py  --language $lang_fleurs
+    ./local/preprocess_commonvoice.py  --language $lang
     touch data/${lang}/fbank/.preprocess_complete
   fi
 fi
@@ -142,7 +142,7 @@ fi
 if [ $stage -le 5 ] && [ $stop_stage -ge 5 ]; then
   log "Stage 5: Preprocess FLEURS manifest"
   if [ ! -e data/${lang_fleurs}/fbank/.preprocess_complete ]; then
-    ./local/preprocess_flleurs.py  --language $lang
+    ./local/preprocess_fleurs.py  --language $lang_fleurs
     touch data/${lang_fleurs}/fbank/.preprocess_complete
   fi
 fi
