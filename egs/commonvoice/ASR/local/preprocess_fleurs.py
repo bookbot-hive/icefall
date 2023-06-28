@@ -37,7 +37,7 @@ def get_args():
     parser.add_argument(
         "--language",
         type=str,
-        help="""Language of Fleurs Voice""",
+        help="""Language of FLEURS Voice""",
     )
 
     return parser.parse_args()
@@ -48,7 +48,7 @@ def normalize_text(utt: str) -> str:
     return re.sub(r"[^a-zA-Z\s]", "", utt).upper()
 
 
-def preprocess_commonvoice(
+def preprocess_fleurs(
     language: str,
     dataset: Optional[str] = None,
 ):
@@ -66,7 +66,7 @@ def preprocess_commonvoice(
         dataset_parts = dataset.split(" ", -1)
 
     logging.info("Loading manifest")
-    prefix = f"cv-{language}"
+    prefix = f"fleurs-{language}"
     suffix = "jsonl.gz"
     manifests = read_manifests_if_cached(
         dataset_parts=dataset_parts,
@@ -119,7 +119,7 @@ def main():
     logging.basicConfig(format=formatter, level=logging.INFO)
     args = get_args()
     logging.info(vars(args))
-    preprocess_commonvoice(
+    preprocess_fleurs(
         language=args.language,
         dataset=args.dataset,
     )
