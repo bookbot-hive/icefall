@@ -174,7 +174,7 @@ if [ $stage -le 8 ] && [ $stop_stage -ge 8 ]; then
       --start 0 \
       --num-splits $num_splits \
       --language $lang \
-      --perturb_speed true
+      --perturb-speed true
     touch data/${lang}/fbank/.cv-${lang}_train.done
   fi
 fi
@@ -182,7 +182,7 @@ fi
 if [ $stage -le 9 ] && [ $stop_stage -ge 9 ]; then
   log "Stage 9: Compute fbank for FLEURS"
   if [ ! -e data/${lang_fleurs}/fbank/.fleurs.done ]; then
-    ./local/compute_fbank_fleurs.py --language $lang_fleurs --perturb_speed true
+    ./local/compute_fbank_fleurs.py --language $lang_fleurs --perturb-speed true
     touch data/fbank/.fleurs.done
   fi
 fi
