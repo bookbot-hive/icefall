@@ -104,6 +104,7 @@ from typing import Dict, List, Optional, Tuple
 import k2
 import torch
 import torch.nn as nn
+from lhotse.cut import Cut
 from asr_datamodule import AsrDataModule
 from multidataset import MultiDataset
 from beam_search import (
