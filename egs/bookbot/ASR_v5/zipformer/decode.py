@@ -852,14 +852,6 @@ def main():
         token_ids = pl.texts_to_token_ids([c.supervisions[0].text]).tolist()[0]
 
         if T < len(token_ids):
-            logging.warning(
-                f"Exclude cut with ID {c.id} from training. "
-                f"Number of frames (before subsampling): {c.num_frames}. "
-                f"Number of frames (after subsampling): {T}. "
-                f"Text: {c.supervisions[0].text}. "
-                f"Tokens: {token_ids}. "
-                f"Number of tokens: {len(token_ids)}"
-            )
             return False
 
         return True
