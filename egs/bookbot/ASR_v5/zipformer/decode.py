@@ -383,7 +383,7 @@ def decode_one_batch(
             max_states=params.max_states,
         )
         for hyp in hyp_tokens:
-            tokens = [str(i) for i in hyp]
+            tokens = [pl.token_table[i] for i in hyp]
             hyps.append(tokens)
     elif params.decoding_method == "fast_beam_search_nbest_LG":
         hyp_tokens = fast_beam_search_nbest_LG(
@@ -412,7 +412,7 @@ def decode_one_batch(
             nbest_scale=params.nbest_scale,
         )
         for hyp in hyp_tokens:
-            tokens = [str(i) for i in hyp]
+            tokens = [pl.token_table[i] for i in hyp]
             hyps.append(tokens)
     elif params.decoding_method == "fast_beam_search_nbest_oracle":
         hyp_tokens = fast_beam_search_nbest_oracle(
@@ -428,7 +428,7 @@ def decode_one_batch(
             nbest_scale=params.nbest_scale,
         )
         for hyp in hyp_tokens:
-            tokens = [str(i) for i in hyp]
+            tokens = [pl.token_table[i] for i in hyp]
             hyps.append(tokens)
     elif params.decoding_method == "greedy_search" and params.max_sym_per_frame == 1:
         hyp_tokens = greedy_search_batch(
@@ -437,7 +437,7 @@ def decode_one_batch(
             encoder_out_lens=encoder_out_lens,
         )
         for hyp in hyp_tokens:
-            tokens = [str(i) for i in hyp]
+            tokens = [pl.token_table[i] for i in hyp]
             hyps.append(tokens)
     elif params.decoding_method == "modified_beam_search":
         hyp_tokens = modified_beam_search(
@@ -447,7 +447,7 @@ def decode_one_batch(
             beam=params.beam_size,
         )
         for hyp in hyp_tokens:
-            tokens = [str(i) for i in hyp]
+            tokens = [pl.token_table[i] for i in hyp]
             hyps.append(tokens)
     else:
         batch_size = encoder_out.size(0)
@@ -472,7 +472,7 @@ def decode_one_batch(
                 raise ValueError(
                     f"Unsupported decoding method: {params.decoding_method}"
                 )
-            hyps.append([str(i) for i in hyp])
+            hyps.append([pl.token_table[i] for i in hyp])
 
     if params.decoding_method == "greedy_search":
         return {"greedy_search": hyps}
@@ -577,7 +577,7 @@ def decode_dataset(
                 this_batch = []
                 assert len(hyps) == len(token_ids)
                 for cut_id, hyp_id, ref_token_id in zip(cut_ids, hyps, token_ids):
-                    ref_token_id = [str(i) for i in ref_token_id]
+                    ref_token_id = [pl.token_table[i] for i in ref_token_id]
                     this_batch.append((cut_id, ref_token_id, hyp_id))
 
                 results[name].extend(this_batch)
