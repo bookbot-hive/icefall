@@ -840,6 +840,29 @@ def main():
     num_param = sum([p.numel() for p in model.parameters()])
     logging.info(f"Number of model parameters: {num_param}")
 
+    def remove_short_and_long_utt(c: Cut):
+        # In pruned RNN-T, we require that T >= S
+        # where T is the number of feature frames after subsampling
+        # and S is the number of tokens in the utterance
+
+        # In ./zipformer.py, the conv module uses the following expression
+        # for subsampling
+        T = ((c.num_frames - 7) // 2 + 1) // 2
+        token_ids = pl.texts_to_token_ids([c.supervisions[0].text]).tolist()[0]
+
+        if T < len(token_ids):
+            logging.warning(
+                f"Exclude cut with ID {c.id} from training. "
+                f"Number of frames (before subsampling): {c.num_frames}. "
+                f"Number of frames (after subsampling): {T}. "
+                f"Text: {c.supervisions[0].text}. "
+                f"Tokens: {token_ids}. "
+                f"Number of tokens: {len(token_ids)}"
+            )
+            return False
+
+        return True
+
     # we need cut ids to display recognition results.
     args.return_cuts = True
     asr_data_module = AsrDataModule(args)
@@ -855,6 +878,8 @@ def main():
     test_cuts_cva_ca = multidataset.test_cuts_cva_ca()
     test_cuts_cva_in = multidataset.test_cuts_cva_in()
     test_cuts_bookbot = multidataset.test_cuts_bookbot()
+
+    test_cuts_bookbot = test_cuts_bookbot.filter(remove_short_and_long_utt)
     # test_cuts_austalk = multidataset.test_cuts_austalk()
     # test_cuts_sccw = multidataset.test_cuts_sccw()
     # test_cuts_l2a = multidataset.test_cuts_l2a()
