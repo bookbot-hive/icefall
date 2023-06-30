@@ -101,11 +101,11 @@ def compute_fbank_fleurs(args):
                 logging.info(f"{partition} already exists - skipping.")
                 continue
 
-            logging.info(f"Processing {partition}")
-            cut_set = CutSet.from_manifests(
-                recordings=m["recordings"],
-                supervisions=m["supervisions"],
-            )
+            raw_cuts_path = output_dir / f"{prefix}_cuts_{partition}_raw.jsonl.gz"
+
+            logging.info(f"Loading {raw_cuts_path}")
+            cut_set = CutSet.from_file(raw_cuts_path)
+
             if args.perturb_speed and partition == "train":
                 logging.info("Doing speed perturb")
                 cut_set = (
