@@ -46,13 +46,6 @@ def get_parser():
         help="The lang dir containing word table and LG graph",
     )
 
-    parser.add_argument(
-        "--manifest-dir",
-        type=str,
-        default="data/manifests",
-        help="Path to manifest directory",
-    )
-
     return parser
 
 
