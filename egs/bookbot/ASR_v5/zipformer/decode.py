@@ -373,7 +373,10 @@ def decode_one_batch(
 
     hyps = []
 
-    if params.decoding_method == "fast_beam_search":
+    if (
+        params.decoding_method == "fast_beam_search"
+        or params.decoding_method == "fast_beam_search_LG"
+    ):
         hyp_tokens = fast_beam_search_one_best(
             model=model,
             decoding_graph=decoding_graph,
@@ -383,9 +386,12 @@ def decode_one_batch(
             max_contexts=params.max_contexts,
             max_states=params.max_states,
         )
-        for hyp in hyp_tokens:
-            tokens = [pl.token_table[i] for i in hyp]
-            hyps.append(tokens)
+        if params.decoding_method == "fast_beam_search":
+            for hyp in hyp_tokens:
+                hyps.append([pl.token_table[i] for i in hyp])
+        else:
+            for hyp in hyp_tokens:
+                hyps.append([word_table[i] for i in hyp])
     elif params.decoding_method == "fast_beam_search_nbest_LG":
         hyp_tokens = fast_beam_search_nbest_LG(
             model=model,
@@ -823,7 +829,10 @@ def main():
     model.eval()
 
     if "fast_beam_search" in params.decoding_method:
-        if params.decoding_method == "fast_beam_search_nbest_LG":
+        if (
+            params.decoding_method == "fast_beam_search_LG"
+            or params.decoding_method == "fast_beam_search_nbest_LG"
+        ):
             word_table = pl.word_table
             lg_filename = params.lang_dir / "LG.pt"
             logging.info(f"Loading {lg_filename}")
