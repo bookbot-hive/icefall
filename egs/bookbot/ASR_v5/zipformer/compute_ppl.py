@@ -42,7 +42,7 @@ def get_parser():
     parser.add_argument(
         "--ngram-lm-path",
         type=str,
-        default="download/lm/lm_3_gram.arpa",
+        default="download/lm/3gram_pruned_1e8.arpa",
         help="The lang dir containing word table and LG graph",
     )
 
