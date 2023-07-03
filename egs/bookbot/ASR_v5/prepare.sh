@@ -237,8 +237,8 @@ if [ $stage -le 8 ] && [ $stop_stage -ge 8 ]; then
     --lm-archive $out_dir/lm_data-test.pt
 fi
 
-if [ $stage -le 14 ] && [ $stop_stage -ge 14 ]; then
-  log "Stage 14: Sort LM training data"
+if [ $stage -le 9 ] && [ $stop_stage -ge 9 ]; then
+  log "Stage 9: Sort LM training data"
   # Sort LM training data by sentence length in descending order
   # for ease of training.
   #
