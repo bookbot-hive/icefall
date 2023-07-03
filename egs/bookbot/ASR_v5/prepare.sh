@@ -200,3 +200,16 @@ if [ $stage -le 5 ] && [ $stop_stage -ge 5 ]; then
   log "Stage 5: Compile LG"
   ./local/compile_lg.py --lang-dir data/lang_phone
 fi
+
+if [ $stage -le 6 ] && [ $stop_stage -ge 6 ]; then
+  log "Stage 6: Generate LM training data"
+
+  out_dir=data/lm_training_phone
+  mkdir -p $out_dir
+
+  ./local/prepare_lm_training_data.py \
+    --lang-dir data/lang_phone \
+    --manifests-dir data/manifests \
+    --split train \
+    --lm-archive $out_dir/lm_data.pt
+fi
