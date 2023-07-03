@@ -236,3 +236,29 @@ if [ $stage -le 8 ] && [ $stop_stage -ge 8 ]; then
     --split test \
     --lm-archive $out_dir/lm_data-test.pt
 fi
+
+if [ $stage -le 14 ] && [ $stop_stage -ge 14 ]; then
+  log "Stage 14: Sort LM training data"
+  # Sort LM training data by sentence length in descending order
+  # for ease of training.
+  #
+  # Sentence length equals to the number of phoneme tokens
+  # in a sentence.
+
+  out_dir=data/lm_training_phone
+  mkdir -p $out_dir
+  ./local/sort_lm_training_data.py \
+    --in-lm-data $out_dir/lm_data.pt \
+    --out-lm-data $out_dir/sorted_lm_data.pt \
+    --out-statistics $out_dir/statistics.txt
+
+  ./local/sort_lm_training_data.py \
+    --in-lm-data $out_dir/lm_data-valid.pt \
+    --out-lm-data $out_dir/sorted_lm_data-valid.pt \
+    --out-statistics $out_dir/statistics-valid.txt
+
+  ./local/sort_lm_training_data.py \
+    --in-lm-data $out_dir/lm_data-test.pt \
+    --out-lm-data $out_dir/sorted_lm_data-test.pt \
+    --out-statistics $out_dir/statistics-test.txt
+fi
