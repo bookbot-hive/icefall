@@ -223,7 +223,7 @@ if [ $stage -le 7 ] && [ $stop_stage -ge 7 ]; then
   ./local/prepare_lm_training_data.py \
     --lang-dir data/lang_phone \
     --manifests-dir data/manifests \
-    --split '[validation dev]' \
+    --split '[dev]' \
     --lm-archive $out_dir/lm_data-valid.pt
 fi
 
