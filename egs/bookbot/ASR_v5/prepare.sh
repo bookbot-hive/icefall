@@ -142,12 +142,8 @@ if [ $stage -le 3 ] && [ $stop_stage -ge 3 ]; then
   mkdir -p $lang_dir
 
   (echo '!SIL	SIL'; echo '<SPOKEN_NOISE>	SPN'; echo '<UNK>	SPN'; ) |
-    cat - $dl_dir/lm/lexicon.tsv |
-    sort | uniq > $lang_dir/lexicon.txt
-  
-  (echo '!SIL	SIL'; echo '<SPOKEN_NOISE>	SPN'; echo '<UNK>	SPN'; ) |
     cat - $dl_dir/lm/uniq_lexicon.tsv |
-    sort | uniq > $lang_dir/uniq_lexicon.txt
+    sort | uniq > $lang_dir/lexicon.txt
 
   if [ ! -f $lang_dir/L_disambig.pt ]; then
     ./local/prepare_lang.py --lang-dir $lang_dir
