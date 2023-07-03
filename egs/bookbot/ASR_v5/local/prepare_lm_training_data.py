@@ -95,7 +95,7 @@ def main():
 
     word2phonemes = []  # Will be a list-of-list-of-int, representing phonemes.
     sentences = []  # Will be a list-of-list-of-int, representing word-ids.
-    step = 3000
+    step = 10000
     processed = 0
 
     supervisions_train = Path(args.manifests_dir).rglob(

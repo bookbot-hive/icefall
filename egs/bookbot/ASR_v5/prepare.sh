@@ -213,3 +213,26 @@ if [ $stage -le 6 ] && [ $stop_stage -ge 6 ]; then
     --split train \
     --lm-archive $out_dir/lm_data.pt
 fi
+
+if [ $stage -le 7 ] && [ $stop_stage -ge 7 ]; then
+  log "Stage 7: Generate LM validation data"
+
+  out_dir=data/lm_training_phone
+  mkdir -p $out_dir
+
+  ./local/prepare_lm_training_data.py \
+    --lang-dir data/lang_phone \
+    --manifests-dir data/manifests \
+    --split '[validation dev]' \
+    --lm-archive $out_dir/lm_data-valid.pt
+fi
+
+if [ $stage -le 8 ] && [ $stop_stage -ge 8 ]; then
+  log "Stage 8: Generate LM test data"
+
+  ./local/prepare_lm_training_data.py \
+    --lang-dir data/lang_phone \
+    --manifests-dir data/manifests \
+    --split test \
+    --lm-archive $out_dir/lm_data-test.pt
+fi
