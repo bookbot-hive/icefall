@@ -30,35 +30,35 @@ if [ $stage -le 0 ] && [ $stop_stage -ge 0 ]; then
   log "Stage 0: Download data"
 
   if [ ! -d $dl_dir/timit ]; then
-    lhotse download bookbot-huggingface bookbot/timit $dl_dir
+    lhotse download bookbot-huggingface bookbot/timit $dl_dir phonemes_ipa " | "
   fi
 
   if [ ! -d $dl_dir/libriphone ]; then
-    lhotse download bookbot-huggingface bookbot/libriphone $dl_dir
+    lhotse download bookbot-huggingface bookbot/libriphone $dl_dir phonemes_ipa " | "
   fi
 
   if [ ! -d $dl_dir/common-voice-13_0-en-v1 ]; then
-    lhotse download bookbot-huggingface bookbot/common-voice-13_0-en-v1 $dl_dir
+    lhotse download bookbot-huggingface bookbot/common-voice-13_0-en-v1 $dl_dir phonemes_ipa " | "
   fi
 
   if [ ! -d $dl_dir/bookbot_en_phonemes ]; then
-    lhotse download bookbot-huggingface bookbot/bookbot_en_phonemes $dl_dir
+    lhotse download bookbot-huggingface bookbot/bookbot_en_phonemes $dl_dir phonemes_ipa " | "
   fi
 
   if [ ! -d $dl_dir/austalk_words_mq ]; then
-    lhotse download bookbot-huggingface bookbot/austalk_words_mq $dl_dir
+    lhotse download bookbot-huggingface bookbot/austalk_words_mq $dl_dir phonemes_ipa " | "
   fi
 
   if [ ! -d $dl_dir/sc_cw_children ]; then
-    lhotse download bookbot-huggingface bookbot/sc_cw_children $dl_dir
+    lhotse download bookbot-huggingface bookbot/sc_cw_children $dl_dir phonemes_ipa " | "
   fi
 
   if [ ! -d $dl_dir/l2-arctic ]; then
-    lhotse download bookbot-huggingface bookbot/l2-arctic $dl_dir
+    lhotse download bookbot-huggingface bookbot/l2-arctic $dl_dir phonemes_ipa " | "
   fi
 
   if [ ! -d $dl_dir/speechocean762 ]; then
-    lhotse download bookbot-huggingface bookbot/speechocean762 $dl_dir
+    lhotse download bookbot-huggingface bookbot/speechocean762 $dl_dir phonemes_ipa " | "
   fi
 
   if [ ! -d $dl_dir/musan ]; then
