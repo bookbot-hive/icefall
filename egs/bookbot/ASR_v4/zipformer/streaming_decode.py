@@ -582,7 +582,8 @@ def decode_dataset(
         assert audio.dtype == np.float32, audio.dtype
 
         # The trained model is using normalized samples
-        assert audio.max() <= 1, "Should be normalized to [-1, 1])"
+        # NOTE: ongoing issue: https://github.com/k2-fsa/icefall/issues/1006
+        # assert audio.max() <= 1, "Should be normalized to [-1, 1])"
 
         samples = torch.from_numpy(audio).squeeze(0)
 
