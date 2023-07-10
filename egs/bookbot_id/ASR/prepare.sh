@@ -30,27 +30,27 @@ if [ $stage -le 0 ] && [ $stop_stage -ge 0 ]; then
   log "Stage 0: Download data"
 
   if [ ! -d $dl_dir/librivox-indonesia ]; then
-    lhotse download bookbot-huggingface bookbot/librivox-indonesia $dl_dir
+    lhotse download bookbot-huggingface bookbot/librivox-indonesia $dl_dir phonemes_ipa " | "
   fi
 
   if [ ! -d $dl_dir/common-voice-13_0-id ]; then
-    lhotse download bookbot-huggingface bookbot/common-voice-13_0-id $dl_dir
+    lhotse download bookbot-huggingface bookbot/common-voice-13_0-id $dl_dir phonemes_ipa " | "
   fi
 
   if [ ! -d $dl_dir/fleurs-id ]; then
-    lhotse download bookbot-huggingface bookbot/fleurs-id $dl_dir
+    lhotse download bookbot-huggingface bookbot/fleurs-id $dl_dir phonemes_ipa " | "
   fi
 
   if [ ! -d $dl_dir/bookbot_id_phonemes ]; then
-    lhotse download bookbot-huggingface bookbot/bookbot_id_phonemes $dl_dir
+    lhotse download bookbot-huggingface bookbot/bookbot_id_phonemes $dl_dir phonemes_ipa " | "
   fi
 
   if [ ! -d $dl_dir/magichub-indocsc ]; then
-    lhotse download bookbot-huggingface bookbot/magichub-indocsc $dl_dir
+    lhotse download bookbot-huggingface bookbot/magichub-indocsc $dl_dir phonemes_ipa " | "
   fi
 
   if [ ! -d $dl_dir/magichub-sindodusc ]; then
-    lhotse download bookbot-huggingface bookbot/magichub-sindodusc $dl_dir
+    lhotse download bookbot-huggingface bookbot/magichub-sindodusc $dl_dir phonemes_ipa " | "
   fi
 
   if [ ! -d $dl_dir/musan ]; then
