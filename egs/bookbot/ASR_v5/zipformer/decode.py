@@ -106,7 +106,6 @@ import torch
 import torch.nn as nn
 from lhotse.cut import Cut
 from asr_datamodule import AsrDataModule
-from multidataset import MultiDataset
 from beam_search import (
     beam_search,
     fast_beam_search_nbest,
@@ -119,6 +118,7 @@ from beam_search import (
     modified_beam_search_lm_shallow_fusion,
     modified_beam_search_LODR,
 )
+from multidataset import MultiDataset
 from train import add_model_arguments, get_params, get_model
 from icefall import LmScorer, NgramLm
 from icefall.checkpoint import (
@@ -311,6 +311,16 @@ def get_parser():
     )
 
     parser.add_argument(
+        "--allow-partial",
+        type=str2bool,
+        default=False,
+        help="""Whether to allow partial hypothesis in.
+        Used only when the decoding method is fast_beam_search,
+        fast_beam_search_nbest, fast_beam_search_nbest_LG,
+        and fast_beam_search_nbest_oracle""",
+    )
+
+    parser.add_argument(
         "--use-shallow-fusion",
         type=str2bool,
         default=False,
@@ -385,8 +395,8 @@ def decode_one_batch(
         It's the return value of :func:`get_params`.
       model:
         The neural model.
-      sp:
-        The BPE model.
+      pl:
+        UniqLexicon.
       batch:
         It is the return value from iterating
         `lhotse.dataset.K2SpeechRecognitionDataset`. See its documentation
@@ -444,6 +454,7 @@ def decode_one_batch(
             beam=params.beam,
             max_contexts=params.max_contexts,
             max_states=params.max_states,
+            allow_partial=params.allow_partial,
         )
         if params.decoding_method == "fast_beam_search":
             for hyp in hyp_tokens:
@@ -462,6 +473,7 @@ def decode_one_batch(
             max_states=params.max_states,
             num_paths=params.num_paths,
             nbest_scale=params.nbest_scale,
+            allow_partial=params.allow_partial,
         )
         for hyp in hyp_tokens:
             hyps.append([word_table[i] for i in hyp])
@@ -476,6 +488,7 @@ def decode_one_batch(
             max_states=params.max_states,
             num_paths=params.num_paths,
             nbest_scale=params.nbest_scale,
+            allow_partial=params.allow_partial,
         )
         for hyp in hyp_tokens:
             tokens = [pl.token_table[i] for i in hyp]
@@ -492,6 +505,7 @@ def decode_one_batch(
             num_paths=params.num_paths,
             ref_texts=pl.texts_to_token_ids(supervisions["text"]).tolist(),
             nbest_scale=params.nbest_scale,
+            allow_partial=params.allow_partial,
         )
         for hyp in hyp_tokens:
             tokens = [pl.token_table[i] for i in hyp]
@@ -601,8 +615,8 @@ def decode_dataset(
         It is returned by :func:`get_params`.
       model:
         The neural model.
-      sp:
-        The BPE model.
+      pl:
+        UniqLexicon.
       word_table:
         The word symbol table.
       decoding_graph:

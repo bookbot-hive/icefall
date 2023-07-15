@@ -40,10 +40,10 @@ import k2
 import numpy as np
 import torch
 from asr_datamodule import AsrDataModule
-from multidataset import MultiDataset
 from decode_stream import DecodeStream
 from kaldifeat import Fbank, FbankOptions
 from lhotse import CutSet
+from multidataset import MultiDataset
 from streaming_beam_search import (
     fast_beam_search_one_best,
     greedy_search,
@@ -190,6 +190,15 @@ def get_parser():
         type=int,
         default=2,
         help="The context size in the decoder. 1 means bigram; 2 means tri-gram",
+    )
+
+    parser.add_argument(
+        "--allow-partial",
+        type=str2bool,
+        default=False,
+        help="""Whether to allow partial hypothesis in.
+        Used only when the decoding method is fast_beam_search.
+        """,
     )
 
     parser.add_argument(
@@ -509,6 +518,7 @@ def decode_one_chunk(
             beam=params.beam,
             max_states=params.max_states,
             max_contexts=params.max_contexts,
+            allow_partial=params.allow_partial,
         )
     elif params.decoding_method == "modified_beam_search":
         modified_beam_search(
@@ -548,8 +558,8 @@ def decode_dataset(
         It is returned by :func:`get_params`.
       model:
         The neural model.
-      sp:
-        The BPE model.
+      pl:
+        UniqLexicon.
       decoding_graph:
         The decoding graph. Can be either a `k2.trivial_graph` or HLG, Used
         only when --decoding_method is fast_beam_search.
