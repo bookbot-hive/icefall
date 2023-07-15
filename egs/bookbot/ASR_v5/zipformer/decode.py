@@ -321,6 +321,15 @@ def get_parser():
     )
 
     parser.add_argument(
+        "--blank-penalty",
+        type=float,
+        default=0.0,
+        help="""
+        Blank symbol logit penalty.
+        """,
+    )
+
+    parser.add_argument(
         "--use-shallow-fusion",
         type=str2bool,
         default=False,
@@ -455,6 +464,7 @@ def decode_one_batch(
             max_contexts=params.max_contexts,
             max_states=params.max_states,
             allow_partial=params.allow_partial,
+            blank_penalty=params.blank_penalty,
         )
         if params.decoding_method == "fast_beam_search":
             for hyp in hyp_tokens:
@@ -474,6 +484,7 @@ def decode_one_batch(
             num_paths=params.num_paths,
             nbest_scale=params.nbest_scale,
             allow_partial=params.allow_partial,
+            blank_penalty=params.blank_penalty,
         )
         for hyp in hyp_tokens:
             hyps.append([word_table[i] for i in hyp])
@@ -489,6 +500,7 @@ def decode_one_batch(
             num_paths=params.num_paths,
             nbest_scale=params.nbest_scale,
             allow_partial=params.allow_partial,
+            blank_penalty=params.blank_penalty,
         )
         for hyp in hyp_tokens:
             tokens = [pl.token_table[i] for i in hyp]
@@ -506,6 +518,7 @@ def decode_one_batch(
             ref_texts=pl.texts_to_token_ids(supervisions["text"]).tolist(),
             nbest_scale=params.nbest_scale,
             allow_partial=params.allow_partial,
+            blank_penalty=params.blank_penalty,
         )
         for hyp in hyp_tokens:
             tokens = [pl.token_table[i] for i in hyp]
@@ -515,6 +528,7 @@ def decode_one_batch(
             model=model,
             encoder_out=encoder_out,
             encoder_out_lens=encoder_out_lens,
+            blank_penalty=params.blank_penalty,
         )
         for hyp in hyp_tokens:
             tokens = [pl.token_table[i] for i in hyp]
@@ -525,6 +539,7 @@ def decode_one_batch(
             encoder_out=encoder_out,
             encoder_out_lens=encoder_out_lens,
             beam=params.beam_size,
+            blank_penalty=params.blank_penalty,
         )
         for hyp in hyp_tokens:
             tokens = [pl.token_table[i] for i in hyp]
@@ -565,12 +580,14 @@ def decode_one_batch(
                     model=model,
                     encoder_out=encoder_out_i,
                     max_sym_per_frame=params.max_sym_per_frame,
+                    blank_penalty=params.blank_penalty,
                 )
             elif params.decoding_method == "beam_search":
                 hyp = beam_search(
                     model=model,
                     encoder_out=encoder_out_i,
                     beam=params.beam_size,
+                    blank_penalty=params.blank_penalty,
                 )
             else:
                 raise ValueError(
