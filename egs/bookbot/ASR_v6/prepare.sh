@@ -44,27 +44,27 @@ if [ $stage -le 0 ] && [ $stop_stage -ge 0 ]; then
   fi
 
   if [ ! -d $dl_dir/common-voice-accent-us ]; then
-    lhotse download bookbot-huggingface bookbot/common-voice-accent-us $dl_dir sentence ""
+    lhotse download bookbot-huggingface bookbot/common-voice-accent-us $dl_dir sentence "" --max-train-samples 15000
   fi
 
   if [ ! -d $dl_dir/common-voice-accent-gb ]; then
-    lhotse download bookbot-huggingface bookbot/common-voice-accent-gb $dl_dir sentence ""
+    lhotse download bookbot-huggingface bookbot/common-voice-accent-gb $dl_dir sentence "" --max-train-samples 15000
   fi
 
   if [ ! -d $dl_dir/common-voice-accent-au ]; then
-    lhotse download bookbot-huggingface bookbot/common-voice-accent-au $dl_dir sentence ""
+    lhotse download bookbot-huggingface bookbot/common-voice-accent-au $dl_dir sentence "" --max-train-samples 15000
   fi
 
   if [ ! -d $dl_dir/common-voice-accent-nz ]; then
-    lhotse download bookbot-huggingface bookbot/common-voice-accent-nz $dl_dir sentence ""
+    lhotse download bookbot-huggingface bookbot/common-voice-accent-nz $dl_dir sentence "" --max-train-samples 15000
   fi
 
   if [ ! -d $dl_dir/common-voice-accent-in ]; then
-    lhotse download bookbot-huggingface bookbot/common-voice-accent-in $dl_dir sentence ""
+    lhotse download bookbot-huggingface bookbot/common-voice-accent-in $dl_dir sentence "" --max-train-samples 15000
   fi
 
   if [ ! -d $dl_dir/common-voice-accent-ca ]; then
-    lhotse download bookbot-huggingface bookbot/common-voice-accent-ca $dl_dir sentence ""
+    lhotse download bookbot-huggingface bookbot/common-voice-accent-ca $dl_dir sentence "" --max-train-samples 15000
   fi
 
   if [ ! -d $dl_dir/bookbot_en_v1-v2 ]; then

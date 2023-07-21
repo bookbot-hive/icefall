@@ -118,7 +118,17 @@ class MultiDataset:
             commonvoice_ca_cuts,
             commonvoice_in_cuts,
             bookbot_cuts,
-            weights=[0.007, 0.042, 0.367, 0.152, 0.049, 0.01, 0.067, 0.115, 0.191],
+            weights=[
+                0.023,
+                0.1981,
+                0.0741,
+                0.0741,
+                0.0741,
+                0.0741,
+                0.0741,
+                0.0741,
+                0.3343,
+            ],
         )
 
     @lru_cache()
