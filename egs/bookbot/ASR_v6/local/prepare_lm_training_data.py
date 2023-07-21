@@ -42,6 +42,7 @@ representation of a dict with the following format:
 import argparse
 import logging
 import gzip
+import json
 from pathlib import Path
 
 import k2
@@ -113,7 +114,9 @@ def main():
 
                 processed += 1
 
-                line_words = line.split()
+                load_dict = json.loads(line)
+                text = load_dict["text"]
+                line_words = text.split()
                 for w in line_words:
                     if w not in word2index:
                         w_bpe = sp.encode(w)
