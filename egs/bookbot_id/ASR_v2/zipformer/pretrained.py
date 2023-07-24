@@ -1,0 +1,1 @@
+../../../bookbot/ASR_v6/zipformer/pretrained.py
