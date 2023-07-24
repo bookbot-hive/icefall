@@ -1,0 +1,1 @@
+../../../bookbot/ASR_v6/local/prepare_transcripts.py
