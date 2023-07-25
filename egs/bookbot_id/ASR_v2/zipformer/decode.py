@@ -344,6 +344,15 @@ def get_parser():
     )
 
     parser.add_argument(
+        "--blank-penalty",
+        type=float,
+        default=0.0,
+        help="""
+        Blank symbol logit penalty.
+        """,
+    )
+
+    parser.add_argument(
         "--use-shallow-fusion",
         type=str2bool,
         default=False,
@@ -474,6 +483,7 @@ def decode_one_batch(
             beam=params.beam,
             max_contexts=params.max_contexts,
             max_states=params.max_states,
+            blank_penalty=params.blank_penalty,
         )
         for hyp in sp.decode(hyp_tokens):
             hyps.append(hyp.split())
@@ -488,6 +498,7 @@ def decode_one_batch(
             max_states=params.max_states,
             num_paths=params.num_paths,
             nbest_scale=params.nbest_scale,
+            blank_penalty=params.blank_penalty,
         )
         for hyp in hyp_tokens:
             hyps.append([word_table[i] for i in hyp])
@@ -502,6 +513,7 @@ def decode_one_batch(
             max_states=params.max_states,
             num_paths=params.num_paths,
             nbest_scale=params.nbest_scale,
+            blank_penalty=params.blank_penalty,
         )
         for hyp in sp.decode(hyp_tokens):
             hyps.append(hyp.split())
@@ -517,6 +529,7 @@ def decode_one_batch(
             num_paths=params.num_paths,
             ref_texts=sp.encode(supervisions["text"]),
             nbest_scale=params.nbest_scale,
+            blank_penalty=params.blank_penalty,
         )
         for hyp in sp.decode(hyp_tokens):
             hyps.append(hyp.split())
@@ -525,6 +538,7 @@ def decode_one_batch(
             model=model,
             encoder_out=encoder_out,
             encoder_out_lens=encoder_out_lens,
+            blank_penalty=params.blank_penalty,
         )
         for hyp in sp.decode(hyp_tokens):
             hyps.append(hyp.split())
@@ -534,6 +548,7 @@ def decode_one_batch(
             encoder_out=encoder_out,
             encoder_out_lens=encoder_out_lens,
             beam=params.beam_size,
+            blank_penalty=params.blank_penalty,
         )
         for hyp in sp.decode(hyp_tokens):
             hyps.append(hyp.split())
@@ -571,12 +586,14 @@ def decode_one_batch(
                     model=model,
                     encoder_out=encoder_out_i,
                     max_sym_per_frame=params.max_sym_per_frame,
+                    blank_penalty=params.blank_penalty,
                 )
             elif params.decoding_method == "beam_search":
                 hyp = beam_search(
                     model=model,
                     encoder_out=encoder_out_i,
                     beam=params.beam_size,
+                    blank_penalty=params.blank_penalty,
                 )
             else:
                 raise ValueError(
