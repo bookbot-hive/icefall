@@ -133,3 +133,82 @@ if [ $stage -le 4 ] && [ $stop_stage -ge 4 ]; then
     fi
   done
 fi
+
+if [ $stage -le 5 ] && [ $stop_stage -ge 5 ]; then
+  log "Stage 5: Generate LM training data"
+
+  for vocab_size in ${vocab_sizes[@]}; do
+    log "Processing vocab_size == ${vocab_size}"
+    lang_dir=data/lang_bpe_${vocab_size}
+    out_dir=data/lm_training_bpe_${vocab_size}
+    mkdir -p $out_dir
+
+    ./local/prepare_lm_training_data.py \
+      --bpe-model $lang_dir/bpe.model \
+      --manifests-dir data/manifests \
+      --split train \
+      --lm-archive $out_dir/lm_data.pt
+  done
+fi
+
+if [ $stage -le 6 ] && [ $stop_stage -ge 6 ]; then
+  log "Stage 6: Generate LM validation data"
+
+  for vocab_size in ${vocab_sizes[@]}; do
+    log "Processing vocab_size == ${vocab_size}"
+    lang_dir=data/lang_bpe_${vocab_size}
+    out_dir=data/lm_training_bpe_${vocab_size}
+    mkdir -p $out_dir
+
+    ./local/prepare_lm_training_data.py \
+      --bpe-model $lang_dir/bpe.model \
+      --manifests-dir data/manifests \
+      --split '[dev]' \
+      --lm-archive $out_dir/lm_data-valid.pt
+  done
+fi
+
+if [ $stage -le 7 ] && [ $stop_stage -ge 7 ]; then
+  log "Stage 7: Generate LM test data"
+
+  for vocab_size in ${vocab_sizes[@]}; do
+    log "Processing vocab_size == ${vocab_size}"
+    lang_dir=data/lang_bpe_${vocab_size}
+    out_dir=data/lm_training_bpe_${vocab_size}
+    mkdir -p $out_dir
+
+    ./local/prepare_lm_training_data.py \
+      --bpe-model $lang_dir/bpe.model \
+      --manifests-dir data/manifests \
+      --split test \
+      --lm-archive $out_dir/lm_data-test.pt
+  done
+fi
+
+if [ $stage -le 8 ] && [ $stop_stage -ge 8 ]; then
+  log "Stage 8: Sort LM training data"
+  # Sort LM training data by sentence length in descending order
+  # for ease of training.
+  #
+  # Sentence length equals to the number of BPE tokens
+  # in a sentence.
+
+  for vocab_size in ${vocab_sizes[@]}; do
+    out_dir=data/lm_training_bpe_${vocab_size}
+    mkdir -p $out_dir
+    ./local/sort_lm_training_data.py \
+      --in-lm-data $out_dir/lm_data.pt \
+      --out-lm-data $out_dir/sorted_lm_data.pt \
+      --out-statistics $out_dir/statistics.txt
+
+    ./local/sort_lm_training_data.py \
+      --in-lm-data $out_dir/lm_data-valid.pt \
+      --out-lm-data $out_dir/sorted_lm_data-valid.pt \
+      --out-statistics $out_dir/statistics-valid.txt
+
+    ./local/sort_lm_training_data.py \
+      --in-lm-data $out_dir/lm_data-test.pt \
+      --out-lm-data $out_dir/sorted_lm_data-test.pt \
+      --out-statistics $out_dir/statistics-test.txt
+  done
+fi
