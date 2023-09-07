@@ -39,9 +39,10 @@ class MultiDataset:
             - common-voice-13_0-id_cuts_test.jsonl.gz
             - magichub-indocsc_cuts_train.jsonl.gz
             - magichub-sindodusc_cuts_train.jsonl.gz
-            - bookbot_id_phonemes_cuts_train.jsonl.gz
-            - bookbot_id_phonemes_cuts_validation.jsonl.gz
-            - bookbot_id_phonemes_cuts_test.jsonl.gz
+            - bookbot_id_v3_cuts_train.jsonl.gz
+            - bookbot_id_v3_cuts_validation.jsonl.gz
+            - bookbot_id_v3_cuts_test.jsonl.gz
+            - id-eleven_cuts_train.jsonl.gz
         """
         self.manifest_dir = Path(manifest_dir)
 
@@ -81,7 +82,13 @@ class MultiDataset:
         # Bookbot
         logging.info("Loading Bookbot in lazy mode")
         bookbot_cuts = load_manifest_lazy(
-            self.manifest_dir / "bookbot_id_phonemes_cuts_train.jsonl.gz"
+            self.manifest_dir / "bookbot_id_v3_cuts_train.jsonl.gz"
+        )
+
+        # Eleven
+        logging.info("Loading Eleven in lazy mode")
+        eleven_cuts = load_manifest_lazy(
+            self.manifest_dir / "id-eleven_cuts_train.jsonl.gz"
         )
 
         return CutSet.mux(
@@ -91,7 +98,8 @@ class MultiDataset:
             indocsc_cuts,
             sindodusc_cuts,
             bookbot_cuts,
-            weights=[0.014, 0.03, 0.028, 0.013, 0.015, 0.9],
+            eleven_cuts,
+            weights=[0.02, 0.04, 0.04, 0.02, 0.02, 0.84, 0.02],
         )
 
     @lru_cache()
@@ -113,7 +121,7 @@ class MultiDataset:
         # Bookbot
         logging.info("Loading Bookbot in lazy mode")
         bookbot_cuts = load_manifest_lazy(
-            self.manifest_dir / "bookbot_id_phonemes_cuts_validation.jsonl.gz"
+            self.manifest_dir / "bookbot_id_v3_cuts_validation.jsonl.gz"
         )
 
         return CutSet.mux(fleurs_cuts, commonvoice_cuts, bookbot_cuts)
@@ -157,7 +165,7 @@ class MultiDataset:
 
         logging.info("Loading Bookbot in lazy mode")
         bookbot_cuts = load_manifest_lazy(
-            self.manifest_dir / "bookbot_id_phonemes_cuts_test.jsonl.gz"
+            self.manifest_dir / "bookbot_id_v3_cuts_test.jsonl.gz"
         )
 
         return bookbot_cuts

@@ -41,8 +41,12 @@ if [ $stage -le 0 ] && [ $stop_stage -ge 0 ]; then
     lhotse download bookbot-huggingface bookbot/fleurs-id $dl_dir phonemes_ipa " | "
   fi
 
-  if [ ! -d $dl_dir/bookbot_id_phonemes ]; then
-    lhotse download bookbot-huggingface bookbot/bookbot_id_phonemes $dl_dir phonemes_ipa " | "
+  if [ ! -d $dl_dir/bookbot_id_v3 ]; then
+    lhotse download bookbot-huggingface bookbot/bookbot_id_v3 $dl_dir phonemes_ipa " | "
+  fi
+
+  if [ ! -d $dl_dir/id-eleven ]; then
+    lhotse download bookbot-huggingface bookbot/id-eleven $dl_dir phonemes_ipa " | "
   fi
 
   if [ ! -d $dl_dir/magichub-indocsc ]; then
@@ -69,7 +73,8 @@ if [ $stage -le 1 ] && [ $stop_stage -ge 1 ]; then
   lhotse prepare bookbot-huggingface $dl_dir/librivox-indonesia data/manifests
   lhotse prepare bookbot-huggingface $dl_dir/common-voice-13_0-id data/manifests
   lhotse prepare bookbot-huggingface $dl_dir/fleurs-id data/manifests
-  lhotse prepare bookbot-huggingface $dl_dir/bookbot_id_phonemes data/manifests
+  lhotse prepare bookbot-huggingface $dl_dir/bookbot_id_v3 data/manifests
+  lhotse prepare bookbot-huggingface $dl_dir/id-eleven data/manifests
   lhotse prepare bookbot-huggingface $dl_dir/magichub-indocsc data/manifests
   lhotse prepare bookbot-huggingface $dl_dir/magichub-sindodusc data/manifests
   lhotse prepare musan $dl_dir/musan data/manifests
@@ -86,6 +91,7 @@ if [ $stage -le 2 ] && [ $stop_stage -ge 2 ]; then
   ./local/compute_fbank_indocsc.py
   ./local/compute_fbank_sindodusc.py
   ./local/compute_fbank_bookbot.py
+  ./local/compute_fbank_eleven.py
   ./local/compute_fbank_musan.py
   ./local/compute_fbank_hallway.py
 fi
