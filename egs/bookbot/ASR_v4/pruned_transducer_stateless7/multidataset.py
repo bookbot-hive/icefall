@@ -34,7 +34,8 @@ class MultiDataset:
             - libriphone_cuts_train.clean.jsonl.gz
             - libriphone_cuts_dev.jsonl.gz
             - libriphone_cuts_test.jsonl.gz
-            - common-voice-13_0-en-v1_cuts_train.jsonl.gz
+            - common_voice_13_0_en_zipformer_cuts_train.jsonl.gz
+            - gigaspeech_zipformer_cuts_train.jsonl.gz
             - bookbot_en_phonemes_cuts_train.jsonl.gz
             - austalk_words_mq_cuts_test.jsonl.gz
             - sc_cw_children_cuts_test.jsonl.gz
@@ -59,7 +60,13 @@ class MultiDataset:
         # Common Voice
         logging.info("Loading Common Voice in lazy mode")
         commonvoice_cuts = load_manifest_lazy(
-            self.manifest_dir / "common-voice-13_0-en-v1_cuts_train.jsonl.gz"
+            self.manifest_dir / "common_voice_13_0_en_zipformer_cuts_train.jsonl.gz"
+        )
+
+        # GigaSpeech
+        logging.info("Loading GigaSpeech in lazy mode")
+        gigaspeech_cuts = load_manifest_lazy(
+            self.manifest_dir / "gigaspeech_zipformer_cuts_train.jsonl.gz"
         )
 
         # Bookbot
@@ -72,8 +79,9 @@ class MultiDataset:
             timit_cuts,
             libriphone_cuts,
             commonvoice_cuts,
+            gigaspeech_cuts,
             bookbot_cuts,
-            weights=[0.05, 0.24, 0.53, 0.18],
+            weights=[0.002, 0.105, 0.213, 0.469, 0.211],
         )
 
     @lru_cache()

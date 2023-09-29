@@ -30,35 +30,39 @@ if [ $stage -le 0 ] && [ $stop_stage -ge 0 ]; then
   log "Stage 0: Download data"
 
   if [ ! -d $dl_dir/timit ]; then
-    lhotse download bookbot-huggingface bookbot/timit $dl_dir phonemes_ipa " | "
+    lhotse download bookbot-huggingface bookbot/timit $dl_dir phonemes_ipa " "
   fi
 
   if [ ! -d $dl_dir/libriphone ]; then
-    lhotse download bookbot-huggingface bookbot/libriphone $dl_dir phonemes_ipa " | "
+    lhotse download bookbot-huggingface bookbot/libriphone $dl_dir phonemes_ipa " "
   fi
 
-  if [ ! -d $dl_dir/common-voice-13_0-en-v1 ]; then
-    lhotse download bookbot-huggingface bookbot/common-voice-13_0-en-v1 $dl_dir phonemes_ipa " | "
+  if [ ! -d $dl_dir/common_voice_13_0_en_zipformer ]; then
+    lhotse download bookbot-huggingface bookbot/common_voice_13_0_en_zipformer $dl_dir phonemes_ipa " "
+  fi
+
+  if [ ! -d $dl_dir/gigaspeech_zipformer ]; then
+    lhotse download bookbot-huggingface bookbot/gigaspeech_zipformer $dl_dir phonemes_ipa " "
   fi
 
   if [ ! -d $dl_dir/bookbot_en_phonemes ]; then
-    lhotse download bookbot-huggingface bookbot/bookbot_en_phonemes $dl_dir phonemes_ipa " | "
+    lhotse download bookbot-huggingface bookbot/bookbot_en_phonemes $dl_dir phonemes_ipa " "
   fi
 
   if [ ! -d $dl_dir/austalk_words_mq ]; then
-    lhotse download bookbot-huggingface bookbot/austalk_words_mq $dl_dir phonemes_ipa " | "
+    lhotse download bookbot-huggingface bookbot/austalk_words_mq $dl_dir phonemes_ipa " "
   fi
 
   if [ ! -d $dl_dir/sc_cw_children ]; then
-    lhotse download bookbot-huggingface bookbot/sc_cw_children $dl_dir phonemes_ipa " | "
+    lhotse download bookbot-huggingface bookbot/sc_cw_children $dl_dir phonemes_ipa " "
   fi
 
   if [ ! -d $dl_dir/l2-arctic ]; then
-    lhotse download bookbot-huggingface bookbot/l2-arctic $dl_dir phonemes_ipa " | "
+    lhotse download bookbot-huggingface bookbot/l2-arctic $dl_dir phonemes_ipa " "
   fi
 
   if [ ! -d $dl_dir/speechocean762 ]; then
-    lhotse download bookbot-huggingface bookbot/speechocean762 $dl_dir phonemes_ipa " | "
+    lhotse download bookbot-huggingface bookbot/speechocean762 $dl_dir phonemes_ipa " "
   fi
 
   if [ ! -d $dl_dir/musan ]; then
@@ -76,7 +80,8 @@ if [ $stage -le 1 ] && [ $stop_stage -ge 1 ]; then
 
   lhotse prepare bookbot-huggingface $dl_dir/timit data/manifests
   lhotse prepare bookbot-huggingface $dl_dir/libriphone data/manifests
-  lhotse prepare bookbot-huggingface $dl_dir/common-voice-13_0-en-v1 data/manifests
+  lhotse prepare bookbot-huggingface $dl_dir/common_voice_13_0_en_zipformer data/manifests
+  lhotse prepare bookbot-huggingface $dl_dir/gigaspeech_zipformer data/manifests
   lhotse prepare bookbot-huggingface $dl_dir/bookbot_en_phonemes data/manifests
   lhotse prepare bookbot-huggingface $dl_dir/austalk_words_mq data/manifests
   lhotse prepare bookbot-huggingface $dl_dir/sc_cw_children data/manifests
@@ -93,6 +98,7 @@ if [ $stage -le 2 ] && [ $stop_stage -ge 2 ]; then
   ./local/compute_fbank_timit.py
   ./local/compute_fbank_libriphone.py
   ./local/compute_fbank_commonvoice.py
+  ./local/compute_fbank_gigaspeech.py
   ./local/compute_fbank_bookbot.py
   ./local/compute_fbank_austalk.py
   ./local/compute_fbank_sccw.py
