@@ -83,7 +83,7 @@ from icefall.dist import cleanup_dist, setup_dist
 from icefall.env import get_env_info
 from icefall.lexicon import Lexicon
 from icefall.hooks import register_inf_check_hooks
-from icefall.otc_graph_compiler import OtcTrainingGraphCompiler
+from icefall.otc_phone_graph_compiler import OtcPhoneTrainingGraphCompiler
 from icefall.utils import (
     AttributeDict,
     MetricsTracker,
@@ -839,7 +839,7 @@ def compute_loss(
     model: Union[nn.Module, DDP],
     lexicon: Lexicon,
     batch: dict,
-    graph_compiler: OtcTrainingGraphCompiler,
+    graph_compiler: OtcPhoneTrainingGraphCompiler,
     is_training: bool,
 ) -> Tuple[Tensor, MetricsTracker]:
     """
@@ -967,7 +967,7 @@ def compute_validation_loss(
     params: AttributeDict,
     model: Union[nn.Module, DDP],
     lexicon: Lexicon,
-    graph_compiler: OtcTrainingGraphCompiler,
+    graph_compiler: OtcPhoneTrainingGraphCompiler,
     valid_dl: torch.utils.data.DataLoader,
     world_size: int = 1,
 ) -> MetricsTracker:
@@ -1003,7 +1003,7 @@ def train_one_epoch(
     params: AttributeDict,
     model: Union[nn.Module, DDP],
     optimizer: torch.optim.Optimizer,
-    graph_compiler: OtcTrainingGraphCompiler,
+    graph_compiler: OtcPhoneTrainingGraphCompiler,
     scheduler: LRSchedulerType,
     lexicon: Lexicon,
     train_dl: torch.utils.data.DataLoader,
@@ -1254,7 +1254,7 @@ def run(rank, world_size, args):
 
     logging.info(params)
 
-    graph_compiler = OtcTrainingGraphCompiler(
+    graph_compiler = OtcPhoneTrainingGraphCompiler(
         params.lang_dir,
         otc_token=params.otc_token,
         device=device,
@@ -1440,7 +1440,7 @@ def scan_pessimistic_batches_for_oom(
     model: Union[nn.Module, DDP],
     train_dl: torch.utils.data.DataLoader,
     optimizer: torch.optim.Optimizer,
-    graph_compiler: OtcTrainingGraphCompiler,
+    graph_compiler: OtcPhoneTrainingGraphCompiler,
     lexicon: Lexicon,
     params: AttributeDict,
 ):
