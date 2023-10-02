@@ -97,8 +97,6 @@ if [ $stage -le 2 ] && [ $stop_stage -ge 2 ]; then
 
   ./local/compute_fbank_timit.py
   ./local/compute_fbank_libriphone.py
-  ./local/compute_fbank_commonvoice.py
-  ./local/compute_fbank_gigaspeech.py
   ./local/compute_fbank_bookbot.py
   ./local/compute_fbank_austalk.py
   ./local/compute_fbank_sccw.py
@@ -109,7 +107,15 @@ if [ $stage -le 2 ] && [ $stop_stage -ge 2 ]; then
 fi
 
 if [ $stage -le 3 ] && [ $stop_stage -ge 3 ]; then
-  log "Stage 3: Prepare phone based lang"
+  log "Stage 3: Preprocess GigaSpeech manifest"
+  if [ ! -f data/fbank/.gigaspeech_preprocess.done ]; then
+    ./local/preprocess_gigaspeech.py
+    touch data/fbank/.gigaspeech_preprocess.done
+  fi
+fi
+
+if [ $stage -le 7 ] && [ $stop_stage -ge 7 ]; then
+  log "Stage 7: Prepare phone based lang"
   lang_dir=data/lang_phone
   mkdir -p $lang_dir
 
