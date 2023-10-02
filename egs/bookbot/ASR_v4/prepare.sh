@@ -143,14 +143,44 @@ fi
 
 if [ $stage -le 6 ] && [ $stop_stage -ge 6 ]; then
   log "Stage 6: Combine features for L (may take 15 hours)"
-  if [ ! -f data/fbank/gigaspeech_cuts_train.jsonl.gz ]; then
+  if [ ! -f data/fbank/gigaspeech_zipformer_cuts_train.jsonl.gz ]; then
     pieces=$(find data/fbank/gigaspeech_train_split_${num_splits} -name "gigaspeech_zipformer_cuts_train.*.jsonl.gz")
     lhotse combine $pieces data/fbank/gigaspeech_zipformer_cuts_train.jsonl.gz
   fi
 fi
 
 if [ $stage -le 7 ] && [ $stop_stage -ge 7 ]; then
-  log "Stage 7: Prepare phone based lang"
+  log "Stage 7: Split CV subset into ${num_splits} pieces"
+  split_dir=data/fbank/commonvoice_train_split_${num_splits}
+  if [ ! -f $split_dir/.commonvoice_train_split.done ]; then
+    lhotse split $num_splits ./data/fbank/common_voice_13_0_en_zipformer_cuts_train_raw.jsonl.gz $split_dir
+    touch $split_dir/.commonvoice_train_split.done
+  fi
+fi
+
+if [ $stage -le 8 ] && [ $stop_stage -ge 8 ]; then
+  log "Stage 8: Compute features for CV"
+  # Note: The script supports --start and --stop options.
+  # You can use several machines to compute the features in parallel.
+  if [ ! -f data/fbank/.commonvoice_train.done ]; then
+    ./local/compute_fbank_commonvoice_splits.py \
+      --num-workers $nj \
+      --batch-duration 600 \
+      --num-splits $num_splits
+    touch data/fbank/.commonvoice_train.done
+  fi
+fi
+
+if [ $stage -le 9 ] && [ $stop_stage -ge 9 ]; then
+  log "Stage 9: Combine features for CV"
+  if [ ! -f data/fbank/common_voice_13_0_en_zipformer_cuts_train.jsonl.gz ]; then
+    pieces=$(find data/fbank/commonvoice_train_split_${num_splits} -name "common_voice_13_0_en_zipformer_cuts_train.*.jsonl.gz")
+    lhotse combine $pieces data/fbank/common_voice_13_0_en_zipformer_cuts_train.jsonl.gz
+  fi
+fi
+
+if [ $stage -le 10 ] && [ $stop_stage -ge 10 ]; then
+  log "Stage 10: Prepare phone based lang"
   lang_dir=data/lang_phone
   mkdir -p $lang_dir
 
