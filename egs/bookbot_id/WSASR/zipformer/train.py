@@ -1489,7 +1489,7 @@ def main():
     args = parser.parse_args()
     args.exp_dir = Path(args.exp_dir)
     assert "▁" not in args.otc_token
-    args.otc_token = f"▁{args.otc_token}"
+    args.otc_token = f"{args.otc_token}"
 
     world_size = args.world_size
     assert world_size >= 1
