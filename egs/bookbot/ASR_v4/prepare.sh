@@ -5,8 +5,13 @@ export PROTOCOL_BUFFERS_PYTHON_IMPLEMENTATION=python
 
 set -eou pipefail
 
+nj=10
 stage=-1
 stop_stage=100
+
+# Split L subset to this number of pieces
+# This is to avoid OOM during feature extraction.
+num_splits=2000
 
 dl_dir=$PWD/download
 splits_dir=$PWD/splits_dir
@@ -111,6 +116,36 @@ if [ $stage -le 3 ] && [ $stop_stage -ge 3 ]; then
   if [ ! -f data/fbank/.gigaspeech_preprocess.done ]; then
     ./local/preprocess_gigaspeech.py
     touch data/fbank/.gigaspeech_preprocess.done
+  fi
+fi
+
+if [ $stage -le 4 ] && [ $stop_stage -ge 4 ]; then
+  log "Stage 4: Split L subset into ${num_splits} pieces"
+  split_dir=data/fbank/gigaspeech_L_split_${num_splits}
+  if [ ! -f $split_dir/.gigaspeech_L_split.done ]; then
+    lhotse split $num_splits ./data/fbank/gigaspeech_cuts_L_raw.jsonl.gz $split_dir
+    touch $split_dir/.gigaspeech_L_split.done
+  fi
+fi
+
+if [ $stage -le 5 ] && [ $stop_stage -ge 5 ]; then
+  log "Stage 5: Compute features for L"
+  # Note: The script supports --start and --stop options.
+  # You can use several machines to compute the features in parallel.
+  if [ ! -f data/fbank/.gigaspeech_L.done ]; then
+    ./local/compute_fbank_gigaspeech_splits.py \
+      --num-workers $nj \
+      --batch-duration 600 \
+      --num-splits $num_splits
+    touch data/fbank/.gigaspeech_L.done
+  fi
+fi
+
+if [ $stage -le 6 ] && [ $stop_stage -ge 6 ]; then
+  log "Stage 6: Combine features for L (may take 15 hours)"
+  if [ ! -f data/fbank/gigaspeech_cuts_L.jsonl.gz ]; then
+    pieces=$(find data/fbank/gigaspeech_L_split_${num_splits} -name "gigaspeech_cuts_L.*.jsonl.gz")
+    lhotse combine $pieces data/fbank/gigaspeech_cuts_L.jsonl.gz
   fi
 fi
 
