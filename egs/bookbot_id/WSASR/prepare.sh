@@ -108,6 +108,6 @@ if [ $stage -le 3 ] && [ $stop_stage -ge 3 ]; then
    --lang-dir $lang_dir
 
   if [ ! -f $lang_dir/L_disambig.pt ]; then
-    ./local/prepare_otc_lang.py --lang-dir $lang_dir
+    ./local/prepare_otc_lang.py --lang-dir $lang_dir --otc-token "${otc_token}"
   fi
 fi
