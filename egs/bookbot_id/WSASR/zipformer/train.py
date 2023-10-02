@@ -911,7 +911,7 @@ def compute_loss(
         # different duration in decreasing order, required by
         # `k2.intersect_dense` called in `k2.ctc_loss`
         supervision_segments, texts, utt_ids, verbatim_texts = encode_supervisions_otc(
-            supervisions, subsampling_factor=params.subsampling_factor
+            supervisions, subsampling_factor=params.subsampling_factor, token_ids=ids
         )
 
         bypass_weight = graph_compiler.initial_bypass_weight * (
