@@ -123,7 +123,7 @@ if [ $stage -le 4 ] && [ $stop_stage -ge 4 ]; then
   log "Stage 4: Split L subset into ${num_splits} pieces"
   split_dir=data/fbank/gigaspeech_L_split_${num_splits}
   if [ ! -f $split_dir/.gigaspeech_L_split.done ]; then
-    lhotse split $num_splits ./data/fbank/gigaspeech_cuts_L_raw.jsonl.gz $split_dir
+    lhotse split $num_splits ./data/fbank/gigaspeech_zipformer_cuts_L_raw.jsonl.gz $split_dir
     touch $split_dir/.gigaspeech_L_split.done
   fi
 fi
@@ -144,8 +144,8 @@ fi
 if [ $stage -le 6 ] && [ $stop_stage -ge 6 ]; then
   log "Stage 6: Combine features for L (may take 15 hours)"
   if [ ! -f data/fbank/gigaspeech_cuts_L.jsonl.gz ]; then
-    pieces=$(find data/fbank/gigaspeech_L_split_${num_splits} -name "gigaspeech_cuts_L.*.jsonl.gz")
-    lhotse combine $pieces data/fbank/gigaspeech_cuts_L.jsonl.gz
+    pieces=$(find data/fbank/gigaspeech_L_split_${num_splits} -name "gigaspeech_zipformer_cuts_L.*.jsonl.gz")
+    lhotse combine $pieces data/fbank/gigaspeech_zipformer_cuts_L.jsonl.gz
   fi
 fi
 
