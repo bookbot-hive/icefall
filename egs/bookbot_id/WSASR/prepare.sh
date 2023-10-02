@@ -8,6 +8,8 @@ set -eou pipefail
 stage=-1
 stop_stage=100
 
+otc_token="<star>"
+
 dl_dir=$PWD/download
 splits_dir=$PWD/splits_dir
 
@@ -106,6 +108,6 @@ if [ $stage -le 3 ] && [ $stop_stage -ge 3 ]; then
    --lang-dir $lang_dir
 
   if [ ! -f $lang_dir/L_disambig.pt ]; then
-    ./local/prepare_lang.py --lang-dir $lang_dir
+    ./local/prepare_otc_lang.py --lang-dir $lang_dir
   fi
 fi
