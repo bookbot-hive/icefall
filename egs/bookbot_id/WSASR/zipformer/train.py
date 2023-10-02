@@ -1374,11 +1374,12 @@ def run(rank, world_size, args):
     valid_cuts = valid_cuts.filter(remove_short_and_long_utt)
     valid_dl = asr_data_module.valid_dataloaders(valid_cuts)
 
-    if not params.print_diagnostics:
+    if params.print_diagnostics:
         scan_pessimistic_batches_for_oom(
             model=model,
             train_dl=train_dl,
             optimizer=optimizer,
+            graph_compiler=graph_compiler,
             lexicon=lexicon,
             params=params,
         )

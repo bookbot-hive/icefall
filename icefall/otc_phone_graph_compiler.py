@@ -172,9 +172,8 @@ class OtcPhoneTrainingGraphCompiler(object):
         for text in texts:
             text_piece_ids = []
 
-            for phn in text.split():
-                piece_ids = self.lexicon.token_table[phn]
-                text_piece_ids.append([piece_ids])
+            for phn in text:
+                text_piece_ids.append([phn])
 
             arcs = []
             start_state = 0
