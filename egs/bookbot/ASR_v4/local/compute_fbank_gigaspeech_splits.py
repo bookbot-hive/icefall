@@ -98,7 +98,6 @@ def compute_fbank_gigaspeech_splits(args):
 
     prefix = "gigaspeech_zipformer"
 
-    num_digits = 8  # num_digits is fixed by lhotse split-lazy
     for i in range(start, stop):
         idx = f"{i + 1}".zfill(num_digits)
         logging.info(f"Processing {idx}/{num_splits}")
