@@ -189,6 +189,15 @@ def get_parser():
         help="The number of streams that can be decoded parallel.",
     )
 
+    parser.add_argument(
+        "--blank-penalty",
+        type=float,
+        default=0.0,
+        help="""
+        Blank symbol logit penalty.
+        """,
+    )
+
     add_model_arguments(parser)
 
     return parser
@@ -487,7 +496,12 @@ def decode_one_chunk(
     encoder_out = model.joiner.encoder_proj(encoder_out)
 
     if params.decoding_method == "greedy_search":
-        greedy_search(model=model, encoder_out=encoder_out, streams=decode_streams)
+        greedy_search(
+            model=model,
+            encoder_out=encoder_out,
+            streams=decode_streams,
+            blank_penalty=params.blank_penalty,
+        )
     elif params.decoding_method == "fast_beam_search":
         processed_lens = torch.tensor(processed_lens, device=device)
         processed_lens = processed_lens + encoder_out_lens
@@ -499,6 +513,7 @@ def decode_one_chunk(
             beam=params.beam,
             max_states=params.max_states,
             max_contexts=params.max_contexts,
+            blank_penalty=params.blank_penalty,
         )
     elif params.decoding_method == "modified_beam_search":
         modified_beam_search(
@@ -506,6 +521,7 @@ def decode_one_chunk(
             streams=decode_streams,
             encoder_out=encoder_out,
             num_active_paths=params.num_active_paths,
+            blank_penalty=params.blank_penalty,
         )
     else:
         raise ValueError(f"Unsupported decoding method: {params.decoding_method}")
