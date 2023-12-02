@@ -96,7 +96,7 @@ def compute_fbank_commonvoice_splits(args):
     extractor = KaldifeatFbank(KaldifeatFbankConfig(device=device))
     logging.info(f"device: {device}")
 
-    prefix = "common_voice_13_0_en_zipformer"
+    prefix = "common_voice_13_0_en_zipformer_v4"
 
     for i in range(start, stop):
         idx = f"{i + 1}".zfill(num_digits)

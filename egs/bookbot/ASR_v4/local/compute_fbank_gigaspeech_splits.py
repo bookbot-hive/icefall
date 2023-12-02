@@ -96,7 +96,7 @@ def compute_fbank_gigaspeech_splits(args):
     extractor = KaldifeatFbank(KaldifeatFbankConfig(device=device))
     logging.info(f"device: {device}")
 
-    prefix = "gigaspeech_zipformer"
+    prefix = "gigaspeech_zipformer_v4"
 
     for i in range(start, stop):
         idx = f"{i + 1}".zfill(num_digits)
