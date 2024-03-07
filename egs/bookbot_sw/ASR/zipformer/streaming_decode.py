@@ -829,10 +829,8 @@ def main():
 
     multidataset = MultiDataset(params.manifest_dir)
 
-    test_cuts_librivox = multidataset.test_cuts_librivox()
     test_cuts_fleurs = multidataset.test_cuts_fleurs()
     test_cuts_commonvoice = multidataset.test_cuts_commonvoice()
-    test_cuts_bookbot = multidataset.test_cuts_bookbot()
 
     test_sets = ["test-fleurs", "test-commonvoice"]
     test_cuts = [test_cuts_fleurs, test_cuts_commonvoice]
