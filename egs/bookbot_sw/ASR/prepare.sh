@@ -30,15 +30,15 @@ if [ $stage -le 0 ] && [ $stop_stage -ge 0 ]; then
   log "Stage 0: Download data"
 
   if [ ! -d $dl_dir/common_voice_16_1_sw ]; then
-    lhotse download bookbot-huggingface bookbot/common_voice_16_1_sw $dl_dir phonemes_ipa " | "
+    lhotse download bookbot-huggingface bookbot/common_voice_16_1_sw $dl_dir phonemes_ipa " "
   fi
 
   if [ ! -d $dl_dir/fleurs_sw ]; then
-    lhotse download bookbot-huggingface bookbot/fleurs_sw $dl_dir phonemes_ipa " | "
+    lhotse download bookbot-huggingface bookbot/fleurs_sw $dl_dir phonemes_ipa " "
   fi
 
   if [ ! -d $dl_dir/ALFFA_swahili ]; then
-    lhotse download bookbot-huggingface bookbot/ALFFA_swahili $dl_dir phonemes_ipa " | "
+    lhotse download bookbot-huggingface bookbot/ALFFA_swahili $dl_dir phonemes_ipa " "
   fi
 
   if [ ! -d $dl_dir/musan ]; then
