@@ -1199,7 +1199,7 @@ def run(rank, world_size, args):
         T = ((c.num_frames - 7) // 2 + 1) // 2
         tokens = c.supervisions[0].text.split()
 
-        if T < len(tokens):
+        if T * 2 // 3 < len(tokens):
             # logging.warning(
             #     f"Exclude cut with ID {c.id} from training. "
             #     f"Number of frames (before subsampling): {c.num_frames}. "

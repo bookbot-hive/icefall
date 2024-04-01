@@ -34,8 +34,8 @@ class MultiDataset:
             - libriphone_cuts_train.clean.jsonl.gz
             - libriphone_cuts_dev.jsonl.gz
             - libriphone_cuts_test.jsonl.gz
-            - common_voice_13_0_en_zipformer_v4_cuts_train.jsonl.gz
-            - gigaspeech_zipformer_v4_cuts_train.jsonl.gz
+            - common_voice_16_1_en_wav2vec2-conformer_cuts_train.jsonl.gz
+            - gigaspeech_wav2vec2-conformer_cuts_train.jsonl.gz
             - bookbot_en_phonemes_cuts_train.jsonl.gz
             - austalk_words_mq_cuts_test.jsonl.gz
             - sc_cw_children_cuts_test.jsonl.gz
@@ -53,35 +53,29 @@ class MultiDataset:
 
         # LibriPhone
         logging.info("Loading LibriPhone in lazy mode")
-        libriphone_cuts = load_manifest_lazy(
-            self.manifest_dir / "libriphone_cuts_train.clean.jsonl.gz"
-        )
+        libriphone_cuts = load_manifest_lazy(self.manifest_dir / "libriphone_cuts_train.clean.jsonl.gz")
 
         # Common Voice
         logging.info("Loading Common Voice in lazy mode")
         commonvoice_cuts = load_manifest_lazy(
-            self.manifest_dir / "common_voice_13_0_en_zipformer_v4_cuts_train.jsonl.gz"
+            self.manifest_dir / "common_voice_16_1_en_wav2vec2-conformer_cuts_train.jsonl.gz"
         )
 
         # GigaSpeech
         logging.info("Loading GigaSpeech in lazy mode")
-        gigaspeech_cuts = load_manifest_lazy(
-            self.manifest_dir / "gigaspeech_zipformer_v4_cuts_train.jsonl.gz"
-        )
+        gigaspeech_cuts = load_manifest_lazy(self.manifest_dir / "gigaspeech_wav2vec2-conformer_cuts_train.jsonl.gz")
 
         # Bookbot
         logging.info("Loading Bookbot in lazy mode")
-        bookbot_cuts = load_manifest_lazy(
-            self.manifest_dir / "bookbot_en_phonemes_cuts_train.jsonl.gz"
-        )
+        bookbot_cuts = load_manifest_lazy(self.manifest_dir / "bookbot_en_phonemes_cuts_train.jsonl.gz")
 
         return CutSet.mux(
-            timit_cuts,
+            bookbot_cuts,
             libriphone_cuts,
+            timit_cuts,
             commonvoice_cuts,
             gigaspeech_cuts,
-            bookbot_cuts,
-            weights=[0.002, 0.105, 0.213, 0.469, 0.211],
+            weights=[0.095, 0.113, 0.018, 0.387, 0.387],
         )
 
     @lru_cache()
@@ -89,9 +83,7 @@ class MultiDataset:
         logging.info("About to get LibriPhone dev cuts")
 
         logging.info("Loading LibriPhone in lazy mode")
-        libriphone_cuts = load_manifest_lazy(
-            self.manifest_dir / "libriphone_cuts_dev.jsonl.gz"
-        )
+        libriphone_cuts = load_manifest_lazy(self.manifest_dir / "libriphone_cuts_dev.jsonl.gz")
 
         return libriphone_cuts
 
@@ -100,9 +92,7 @@ class MultiDataset:
         logging.info("About to get LibriPhone test cuts")
 
         logging.info("Loading LibriPhone in lazy mode")
-        libriphone_cuts = load_manifest_lazy(
-            self.manifest_dir / "libriphone_cuts_test.jsonl.gz"
-        )
+        libriphone_cuts = load_manifest_lazy(self.manifest_dir / "libriphone_cuts_test.jsonl.gz")
 
         return libriphone_cuts
 
@@ -120,9 +110,7 @@ class MultiDataset:
         logging.info("About to get AusTalk test cuts")
 
         logging.info("Loading AusTalk in lazy mode")
-        austalk_cuts = load_manifest_lazy(
-            self.manifest_dir / "austalk_words_mq_cuts_test.jsonl.gz"
-        )
+        austalk_cuts = load_manifest_lazy(self.manifest_dir / "austalk_words_mq_cuts_test.jsonl.gz")
 
         return austalk_cuts
 
@@ -131,9 +119,7 @@ class MultiDataset:
         logging.info("About to get SC-CW test cuts")
 
         logging.info("Loading SC-CW in lazy mode")
-        sccw_cuts = load_manifest_lazy(
-            self.manifest_dir / "sc_cw_children_cuts_test.jsonl.gz"
-        )
+        sccw_cuts = load_manifest_lazy(self.manifest_dir / "sc_cw_children_cuts_test.jsonl.gz")
 
         return sccw_cuts
 
@@ -142,9 +128,7 @@ class MultiDataset:
         logging.info("About to get L2 Arctic test cuts")
 
         logging.info("Loading L2 Arctic in lazy mode")
-        l2a_cuts = load_manifest_lazy(
-            self.manifest_dir / "l2-arctic_cuts_test.jsonl.gz"
-        )
+        l2a_cuts = load_manifest_lazy(self.manifest_dir / "l2-arctic_cuts_test.jsonl.gz")
 
         return l2a_cuts
 
@@ -153,8 +137,6 @@ class MultiDataset:
         logging.info("About to get SpeechOcean test cuts")
 
         logging.info("Loading SpeechOcean in lazy mode")
-        speechocean_cuts = load_manifest_lazy(
-            self.manifest_dir / "speechocean762_cuts_test.jsonl.gz"
-        )
+        speechocean_cuts = load_manifest_lazy(self.manifest_dir / "speechocean762_cuts_test.jsonl.gz")
 
         return speechocean_cuts
