@@ -8,7 +8,7 @@ stop_stage=100
 
 # Split data/${lang}set to this number of pieces
 # This is to avoid OOM during feature extraction.
-num_splits=10
+num_splits=1000
 
 # In case you want to use all validated data
 use_validated=false
