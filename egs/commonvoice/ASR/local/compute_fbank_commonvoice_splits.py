@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
-# Copyright    2023  Xiaomi Corp.             (Yifan Yang)
+# Copyright    2023-2024  Xiaomi Corp.             (Yifan Yang,
+#                                                   Zengrui Jin,)
 #
 # See ../../../../LICENSE for clarification regarding multiple authors
 #
@@ -17,7 +18,6 @@
 
 import argparse
 import logging
-from datetime import datetime
 from pathlib import Path
 
 import torch
@@ -44,6 +44,14 @@ def get_args():
     parser = argparse.ArgumentParser()
 
     parser.add_argument(
+        "--subset",
+        type=str,
+        default="train",
+        choices=["train", "validated", "invalidated"],
+        help="""Dataset parts to compute fbank. """,
+    )
+
+    parser.add_argument(
         "--language",
         type=str,
         help="""Language of Common Voice""",
@@ -68,21 +76,21 @@ def get_args():
         "--num-splits",
         type=int,
         required=True,
-        help="The number of splits of the train subset",
+        help="The number of splits of the subset",
     )
 
     parser.add_argument(
         "--start",
         type=int,
         default=0,
-        help="Process pieces starting from this number (inclusive).",
+        help="Process pieces starting from this number (included).",
     )
 
     parser.add_argument(
         "--stop",
         type=int,
         default=-1,
-        help="Stop processing pieces until this number (exclusive).",
+        help="Stop processing pieces until this number (excluded).",
     )
 
     parser.add_argument(
@@ -96,7 +104,7 @@ def get_args():
 
 
 def compute_fbank_commonvoice_splits(args):
-    subset = "train"
+    subset = args.subset
     num_splits = args.num_splits
     language = args.language
     output_dir = f"data/{language}/fbank/cv-{language}_{subset}_split_{num_splits}"
@@ -140,7 +148,7 @@ def compute_fbank_commonvoice_splits(args):
         )
 
         if args.perturb_speed:
-            logging.info("Doing speed perturb")
+            logging.info(f"Doing speed perturb")
             cut_set = cut_set + cut_set.perturb_speed(0.9) + cut_set.perturb_speed(1.1)
 
         logging.info("Computing features")
