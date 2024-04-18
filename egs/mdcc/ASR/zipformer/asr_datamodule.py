@@ -1,5 +1,6 @@
 # Copyright      2021  Piotr Żelasko
 # Copyright      2022  Xiaomi Corporation     (Author: Mingshuang Luo)
+# Copyright      2024  Xiaomi Corporation     (Author: Zengrui Jin)
 #
 # See ../../../../LICENSE for clarification regarding multiple authors
 #
@@ -21,38 +22,25 @@ import inspect
 import logging
 from functools import lru_cache
 from pathlib import Path
-from typing import Any, Dict, Optional
+from typing import Any, Dict, List, Optional
 
-import torch
 from lhotse import CutSet, Fbank, FbankConfig, load_manifest, load_manifest_lazy
-from lhotse.dataset import (  # noqa F401 for PrecomputedFeatures
+from lhotse.dataset import (
     CutConcatenate,
     CutMix,
     DynamicBucketingSampler,
     K2SpeechRecognitionDataset,
     PrecomputedFeatures,
-    SingleCutSampler,
+    SimpleCutSampler,
     SpecAugment,
 )
-from lhotse.dataset.input_strategies import (  # noqa F401 For AudioSamples
-    AudioSamples,
-    OnTheFlyFeatures,
-)
-from lhotse.utils import fix_random_seed
+from lhotse.dataset.input_strategies import OnTheFlyFeatures
 from torch.utils.data import DataLoader
 
 from icefall.utils import str2bool
 
 
-class _SeedWorkers:
-    def __init__(self, seed: int):
-        self.seed = seed
-
-    def __call__(self, worker_id: int):
-        fix_random_seed(self.seed + worker_id)
-
-
-class CommonVoiceAsrDataModule:
+class MdccAsrDataModule:
     """
     DataModule for k2 ASR experiments.
     It assumes there is always one train and valid dataloader,
@@ -81,19 +69,6 @@ class CommonVoiceAsrDataModule:
             "PyTorch DataLoaders from Lhotse CutSet's -- they control the "
             "effective batch sizes, sampling strategies, applied data "
             "augmentations, etc.",
-        )
-
-        group.add_argument(
-            "--language",
-            type=str,
-            default="fr",
-            help="""Language of Common Voice""",
-        )
-        group.add_argument(
-            "--cv-manifest-dir",
-            type=Path,
-            default=Path("data/fr/fbank"),
-            help="Path to directory with CommonVoice train/dev/test cuts.",
         )
         group.add_argument(
             "--manifest-dir",
@@ -207,17 +182,8 @@ class CommonVoiceAsrDataModule:
             "with training dataset. ",
         )
 
-        group.add_argument(
-            "--input-strategy",
-            type=str,
-            default="PrecomputedFeatures",
-            help="AudioSamples or PrecomputedFeatures",
-        )
-
     def train_dataloaders(
-        self,
-        cuts_train: CutSet,
-        sampler_state_dict: Optional[Dict[str, Any]] = None,
+        self, cuts_train: CutSet, sampler_state_dict: Optional[Dict[str, Any]] = None
     ) -> DataLoader:
         """
         Args:
@@ -226,13 +192,14 @@ class CommonVoiceAsrDataModule:
           sampler_state_dict:
             The state dict for the training sampler.
         """
+        logging.info("About to get Musan cuts")
+        cuts_musan = load_manifest(self.args.manifest_dir / "musan_cuts.jsonl.gz")
+
         transforms = []
         if self.args.enable_musan:
             logging.info("Enable MUSAN")
-            logging.info("About to get Musan cuts")
-            cuts_musan = load_manifest(self.args.manifest_dir / "musan_cuts.jsonl.gz")
             transforms.append(
-                CutMix(cuts=cuts_musan, prob=0.5, snr=(10, 20), preserve_id=True)
+                CutMix(cuts=cuts_musan, p=0.5, snr=(10, 20), preserve_id=True)
             )
         else:
             logging.info("Disable MUSAN")
@@ -279,7 +246,6 @@ class CommonVoiceAsrDataModule:
 
         logging.info("About to create train dataset")
         train = K2SpeechRecognitionDataset(
-            input_strategy=eval(self.args.input_strategy)(),
             cut_transforms=transforms,
             input_transforms=input_transforms,
             return_cuts=self.args.return_cuts,
@@ -315,8 +281,8 @@ class CommonVoiceAsrDataModule:
                 drop_last=self.args.drop_last,
             )
         else:
-            logging.info("Using SingleCutSampler.")
-            train_sampler = SingleCutSampler(
+            logging.info("Using SimpleCutSampler.")
+            train_sampler = SimpleCutSampler(
                 cuts_train,
                 max_duration=self.args.max_duration,
                 shuffle=self.args.shuffle,
@@ -327,18 +293,12 @@ class CommonVoiceAsrDataModule:
             logging.info("Loading sampler state dict")
             train_sampler.load_state_dict(sampler_state_dict)
 
-        # 'seed' is derived from the current random state, which will have
-        # previously been set in the main process.
-        seed = torch.randint(0, 100000, ()).item()
-        worker_init_fn = _SeedWorkers(seed)
-
         train_dl = DataLoader(
             train,
             sampler=train_sampler,
             batch_size=None,
             num_workers=self.args.num_workers,
             persistent_workers=False,
-            worker_init_fn=worker_init_fn,
         )
 
         return train_dl
@@ -381,11 +341,13 @@ class CommonVoiceAsrDataModule:
         return valid_dl
 
     def test_dataloaders(self, cuts: CutSet) -> DataLoader:
-        logging.debug("About to create test dataset")
+        logging.info("About to create test dataset")
         test = K2SpeechRecognitionDataset(
-            input_strategy=OnTheFlyFeatures(Fbank(FbankConfig(num_mel_bins=80)))
-            if self.args.on_the_fly_feats
-            else eval(self.args.input_strategy)(),
+            input_strategy=(
+                OnTheFlyFeatures(Fbank(FbankConfig(num_mel_bins=80)))
+                if self.args.on_the_fly_feats
+                else PrecomputedFeatures()
+            ),
             return_cuts=self.args.return_cuts,
         )
         sampler = DynamicBucketingSampler(
@@ -393,7 +355,6 @@ class CommonVoiceAsrDataModule:
             max_duration=self.args.max_duration,
             shuffle=False,
         )
-        logging.debug("About to create test dataloader")
         test_dl = DataLoader(
             test,
             batch_size=None,
@@ -405,20 +366,17 @@ class CommonVoiceAsrDataModule:
     @lru_cache()
     def train_cuts(self) -> CutSet:
         logging.info("About to get train cuts")
-        return load_manifest_lazy(
-            self.args.cv_manifest_dir / f"cv-{self.args.language}_cuts_train.jsonl.gz"
+        cuts_train = load_manifest_lazy(
+            self.args.manifest_dir / "mdcc_cuts_train.jsonl.gz"
         )
+        return cuts_train
 
     @lru_cache()
-    def dev_cuts(self) -> CutSet:
-        logging.info("About to get dev cuts")
-        return load_manifest_lazy(
-            self.args.cv_manifest_dir / f"cv-{self.args.language}_cuts_dev.jsonl.gz"
-        )
+    def valid_cuts(self) -> CutSet:
+        logging.info("About to get valid cuts")
+        return load_manifest_lazy(self.args.manifest_dir / "mdcc_cuts_valid.jsonl.gz")
 
     @lru_cache()
-    def test_cuts(self) -> CutSet:
+    def test_cuts(self) -> List[CutSet]:
         logging.info("About to get test cuts")
-        return load_manifest_lazy(
-            self.args.cv_manifest_dir / f"cv-{self.args.language}_cuts_test.jsonl.gz"
-        )
+        return load_manifest_lazy(self.args.manifest_dir / "mdcc_cuts_test.jsonl.gz")
