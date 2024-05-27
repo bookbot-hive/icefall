@@ -18,7 +18,7 @@
 
 
 """
-This file computes fbank features of the Bookbot dataset.
+This file computes fbank features of the Eleven dataset.
 It looks for manifests in the directory data/manifests.
 
 The generated fbank features are saved in data/fbank.
@@ -44,14 +44,14 @@ torch.set_num_threads(1)
 torch.set_num_interop_threads(1)
 
 
-def compute_fbank_bookbot():
+def compute_fbank_althaf():
     src_dir = Path("data/manifests")
     output_dir = Path("data/fbank")
     num_jobs = min(15, os.cpu_count())
     num_mel_bins = 80
 
     dataset_parts = ("train",)
-    prefix = "bookbot_en_phonemes_w2v-bert-2"
+    prefix = "id-ID-AlthafNeural-Eleven"
     suffix = "jsonl.gz"
     manifests = read_manifests_if_cached(
         dataset_parts=dataset_parts,
@@ -99,4 +99,4 @@ if __name__ == "__main__":
 
     logging.basicConfig(format=formatter, level=logging.INFO)
 
-    compute_fbank_bookbot()
+    compute_fbank_althaf()

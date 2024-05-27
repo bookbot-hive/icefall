@@ -846,7 +846,7 @@ def main():
     multidataset = MultiDataset(params.manifest_dir)
 
     test_cuts_libri = multidataset.test_cuts_libri()
-    test_cuts_timit = multidataset.test_cuts_timit()
+    # test_cuts_timit = multidataset.test_cuts_timit()
     test_cuts_austalk = multidataset.test_cuts_austalk()
     test_cuts_sccw = multidataset.test_cuts_sccw()
     test_cuts_l2a = multidataset.test_cuts_l2a()
@@ -854,7 +854,7 @@ def main():
 
     test_sets = [
         "test-libriphone",
-        "test-timit",
+        # "test-timit",
         "test-austalk",
         "test-sccw",
         "test-l2a",
@@ -863,7 +863,7 @@ def main():
 
     test_cuts = [
         test_cuts_libri,
-        test_cuts_timit,
+        # test_cuts_timit,
         test_cuts_austalk,
         test_cuts_sccw,
         test_cuts_l2a,

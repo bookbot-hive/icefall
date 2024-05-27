@@ -96,10 +96,10 @@ def compute_fbank_commonvoice_splits(args):
     extractor = KaldifeatFbank(KaldifeatFbankConfig(device=device))
     logging.info(f"device: {device}")
 
-    prefix = "common_voice_16_1_en_wav2vec2-conformer"
+    prefix = "common_voice_16_1_en_w2v-bert-2"
 
     for i in range(start, stop):
-        idx = f"{i + 1}".zfill(num_digits)
+        idx = str(i).zfill(num_digits)
         logging.info(f"Processing {idx}/{num_splits}")
 
         cuts_path = output_dir / f"{prefix}_cuts_train.{idx}.jsonl.gz"

@@ -108,7 +108,7 @@ def get_tokens(lexicon: Lexicon) -> List[str]:
     for _, tokens in lexicon:
         ans.update(tokens)
 
-    sorted_ans = list(ans)
+    sorted_ans = sorted(ans)
     return sorted_ans
 
 

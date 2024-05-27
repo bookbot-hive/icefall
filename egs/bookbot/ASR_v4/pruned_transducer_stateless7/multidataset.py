@@ -29,14 +29,13 @@ class MultiDataset:
           manifest_dir:
             It is expected to contain the following files:
 
-            - timit_cuts_train.jsonl.gz
-            - timit_cuts_test.jsonl.gz
             - libriphone_cuts_train.clean.jsonl.gz
             - libriphone_cuts_dev.jsonl.gz
             - libriphone_cuts_test.jsonl.gz
-            - common_voice_16_1_en_wav2vec2-conformer_cuts_train.jsonl.gz
-            - gigaspeech_wav2vec2-conformer_cuts_train.jsonl.gz
-            - bookbot_en_phonemes_cuts_train.jsonl.gz
+            - common_voice_16_1_en_w2v-bert-2_cuts_train.jsonl.gz
+            - gigaspeech_w2v-bert-2_cuts_train.jsonl.gz
+            - bookbot_en_phonemes_w2v-bert-2_cuts_train.jsonl.gz
+            - en-AU-Dean2Zak_cuts_train.jsonl.gz
             - austalk_words_mq_cuts_test.jsonl.gz
             - sc_cw_children_cuts_test.jsonl.gz
             - l2-arctic_cuts_test.jsonl.gz
@@ -47,35 +46,33 @@ class MultiDataset:
     def train_cuts(self) -> CutSet:
         logging.info("About to get multidataset train cuts")
 
-        # TIMIT
-        logging.info("Loading TIMIT in lazy mode")
-        timit_cuts = load_manifest_lazy(self.manifest_dir / "timit_cuts_train.jsonl.gz")
-
         # LibriPhone
         logging.info("Loading LibriPhone in lazy mode")
         libriphone_cuts = load_manifest_lazy(self.manifest_dir / "libriphone_cuts_train.clean.jsonl.gz")
 
         # Common Voice
         logging.info("Loading Common Voice in lazy mode")
-        commonvoice_cuts = load_manifest_lazy(
-            self.manifest_dir / "common_voice_16_1_en_wav2vec2-conformer_cuts_train.jsonl.gz"
-        )
+        commonvoice_cuts = load_manifest_lazy(self.manifest_dir / "common_voice_16_1_en_w2v-bert-2_cuts_train.jsonl.gz")
 
         # GigaSpeech
         logging.info("Loading GigaSpeech in lazy mode")
-        gigaspeech_cuts = load_manifest_lazy(self.manifest_dir / "gigaspeech_wav2vec2-conformer_cuts_train.jsonl.gz")
+        gigaspeech_cuts = load_manifest_lazy(self.manifest_dir / "gigaspeech_w2v-bert-2_cuts_train.jsonl.gz")
 
         # Bookbot
         logging.info("Loading Bookbot in lazy mode")
-        bookbot_cuts = load_manifest_lazy(self.manifest_dir / "bookbot_en_phonemes_cuts_train.jsonl.gz")
+        bookbot_cuts = load_manifest_lazy(self.manifest_dir / "bookbot_en_phonemes_w2v-bert-2_cuts_train.jsonl.gz")
+
+        # en-AU-Dean2Zak
+        logging.info("Loading en-AU-Dean2Zak in lazy mode")
+        dean2zak_cuts = load_manifest_lazy(self.manifest_dir / "en-AU-Dean2Zak_cuts_train.jsonl.gz")
 
         return CutSet.mux(
             bookbot_cuts,
             libriphone_cuts,
-            timit_cuts,
             commonvoice_cuts,
             gigaspeech_cuts,
-            weights=[0.095, 0.113, 0.018, 0.387, 0.387],
+            dean2zak_cuts,
+            weights=[0.015, 0.009, 0.333, 0.637, 0.006],
         )
 
     @lru_cache()
@@ -96,14 +93,14 @@ class MultiDataset:
 
         return libriphone_cuts
 
-    @lru_cache()
-    def test_cuts_timit(self) -> CutSet:
-        logging.info("About to get TIMIT test cuts")
+    # @lru_cache()
+    # def test_cuts_timit(self) -> CutSet:
+    #     logging.info("About to get TIMIT test cuts")
 
-        logging.info("Loading TIMIT in lazy mode")
-        timit_cuts = load_manifest_lazy(self.manifest_dir / "timit_cuts_test.jsonl.gz")
+    #     logging.info("Loading TIMIT in lazy mode")
+    #     timit_cuts = load_manifest_lazy(self.manifest_dir / "timit_cuts_test.jsonl.gz")
 
-        return timit_cuts
+    #     return timit_cuts
 
     @lru_cache()
     def test_cuts_austalk(self) -> CutSet:

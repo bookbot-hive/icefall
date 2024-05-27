@@ -51,7 +51,7 @@ def compute_fbank_bookbot():
     num_mel_bins = 80
 
     dataset_parts = ("train", "validation", "test")
-    prefix = "bookbot_id_v3"
+    prefix = "bookbot_id_v4"
     suffix = "jsonl.gz"
     manifests = read_manifests_if_cached(
         dataset_parts=dataset_parts,

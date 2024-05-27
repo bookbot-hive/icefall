@@ -34,24 +34,28 @@ log "dl_dir: $dl_dir"
 if [ $stage -le 0 ] && [ $stop_stage -ge 0 ]; then
   log "Stage 0: Download data"
 
-  if [ ! -d $dl_dir/timit ]; then
-    lhotse download bookbot-huggingface bookbot/timit $dl_dir phonemes_ipa " "
-  fi
+  # if [ ! -d $dl_dir/timit ]; then
+  #   lhotse download bookbot-huggingface bookbot/timit $dl_dir phonemes_ipa " "
+  # fi
 
   if [ ! -d $dl_dir/libriphone ]; then
     lhotse download bookbot-huggingface bookbot/libriphone $dl_dir phonemes_ipa " "
   fi
 
-  if [ ! -d $dl_dir/common_voice_16_1_en_wav2vec2-conformer ]; then
-    lhotse download bookbot-huggingface bookbot/common_voice_16_1_en_wav2vec2-conformer $dl_dir phonemes_ipa " "
+  if [ ! -d $dl_dir/common_voice_16_1_en_w2v-bert-2.0 ]; then
+    lhotse download bookbot-huggingface bookbot/common_voice_16_1_en_w2v-bert-2.0 $dl_dir phonemes_ipa " "
   fi
 
-  if [ ! -d $dl_dir/gigaspeech_wav2vec2-conformer ]; then
-    lhotse download bookbot-huggingface bookbot/gigaspeech_wav2vec2-conformer $dl_dir phonemes_ipa " "
+  if [ ! -d $dl_dir/gigaspeech_w2v-bert-2.0 ]; then
+    lhotse download bookbot-huggingface bookbot/gigaspeech_w2v-bert-2.0 $dl_dir phonemes_ipa " "
   fi
 
-  if [ ! -d $dl_dir/bookbot_en_phonemes ]; then
-    lhotse download bookbot-huggingface bookbot/bookbot_en_phonemes $dl_dir phonemes_ipa " "
+  if [ ! -d $dl_dir/bookbot_en_phonemes_w2v-bert-2.0 ]; then
+    lhotse download bookbot-huggingface bookbot/bookbot_en_phonemes_w2v-bert-2.0 $dl_dir phonemes_ipa " "
+  fi
+
+  if [ ! -d $dl_dir/en-AU-Dean2Zak ]; then
+    lhotse download bookbot-huggingface bookbot/en-AU-Dean2Zak $dl_dir phonemes_ipa " "
   fi
 
   if [ ! -d $dl_dir/austalk_words_mq ]; then
@@ -83,11 +87,12 @@ if [ $stage -le 1 ] && [ $stop_stage -ge 1 ]; then
   log "Stage 1: Prepare manifests"
   mkdir -p data/manifests
 
-  lhotse prepare bookbot-huggingface $dl_dir/timit data/manifests
+  # lhotse prepare bookbot-huggingface $dl_dir/timit data/manifests
   lhotse prepare bookbot-huggingface $dl_dir/libriphone data/manifests
-  lhotse prepare bookbot-huggingface $dl_dir/common_voice_16_1_en_wav2vec2-conformer data/manifests
-  lhotse prepare bookbot-huggingface $dl_dir/gigaspeech_wav2vec2-conformer data/manifests
-  lhotse prepare bookbot-huggingface $dl_dir/bookbot_en_phonemes data/manifests
+  lhotse prepare bookbot-huggingface $dl_dir/common_voice_16_1_en_w2v-bert-2.0 data/manifests
+  lhotse prepare bookbot-huggingface $dl_dir/gigaspeech_w2v-bert-2.0 data/manifests
+  lhotse prepare bookbot-huggingface $dl_dir/bookbot_en_phonemes_w2v-bert-2.0 data/manifests
+  lhotse prepare bookbot-huggingface $dl_dir/en-AU-Dean2Zak data/manifests
   lhotse prepare bookbot-huggingface $dl_dir/austalk_words_mq data/manifests
   lhotse prepare bookbot-huggingface $dl_dir/sc_cw_children data/manifests
   lhotse prepare bookbot-huggingface $dl_dir/l2-arctic data/manifests
@@ -100,9 +105,10 @@ if [ $stage -le 2 ] && [ $stop_stage -ge 2 ]; then
   log "Stage 2: Compute fbanks"
   mkdir -p data/fbank
 
-  ./local/compute_fbank_timit.py
+  # ./local/compute_fbank_timit.py
   ./local/compute_fbank_libriphone.py
   ./local/compute_fbank_bookbot.py
+  ./local/compute_fbank_en_au_dean2zak.py
   ./local/compute_fbank_austalk.py
   ./local/compute_fbank_sccw.py
   ./local/compute_fbank_l2.py
@@ -123,7 +129,7 @@ if [ $stage -le 4 ] && [ $stop_stage -ge 4 ]; then
   log "Stage 4: Split L subset into ${num_splits} pieces"
   split_dir=data/fbank/gigaspeech_train_split_${num_splits}
   if [ ! -f $split_dir/.gigaspeech_train_split.done ]; then
-    lhotse split $num_splits ./data/fbank/gigaspeech_wav2vec2-conformer_cuts_train_raw.jsonl.gz $split_dir
+    lhotse split $num_splits ./data/fbank/gigaspeech_w2v-bert-2_cuts_train_raw.jsonl.gz $split_dir
     touch $split_dir/.gigaspeech_train_split.done
   fi
 fi
@@ -143,9 +149,9 @@ fi
 
 if [ $stage -le 6 ] && [ $stop_stage -ge 6 ]; then
   log "Stage 6: Combine features for L (may take 15 hours)"
-  if [ ! -f data/fbank/gigaspeech_wav2vec2-conformer_cuts_train.jsonl.gz ]; then
-    pieces=$(find data/fbank/gigaspeech_train_split_${num_splits} -name "gigaspeech_wav2vec2-conformer_cuts_train.*.jsonl.gz")
-    lhotse combine $pieces data/fbank/gigaspeech_wav2vec2-conformer_cuts_train.jsonl.gz
+  if [ ! -f data/fbank/gigaspeech_w2v-bert-2_cuts_train.jsonl.gz ]; then
+    pieces=$(find data/fbank/gigaspeech_train_split_${num_splits} -name "gigaspeech_w2v-bert-2_cuts_train.*.jsonl.gz")
+    lhotse combine $pieces data/fbank/gigaspeech_w2v-bert-2_cuts_train.jsonl.gz
   fi
 fi
 
@@ -161,7 +167,7 @@ if [ $stage -le 8 ] && [ $stop_stage -ge 8 ]; then
   log "Stage 8: Split CV subset into ${num_splits} pieces"
   split_dir=data/fbank/commonvoice_train_split_${num_splits}
   if [ ! -f $split_dir/.commonvoice_train_split.done ]; then
-    lhotse split $num_splits ./data/fbank/common_voice_16_1_en_wav2vec2-conformer_cuts_train_raw.jsonl.gz $split_dir
+    lhotse split $num_splits ./data/fbank/common_voice_16_1_en_w2v-bert-2_cuts_train_raw.jsonl.gz $split_dir
     touch $split_dir/.commonvoice_train_split.done
   fi
 fi
@@ -181,9 +187,9 @@ fi
 
 if [ $stage -le 10 ] && [ $stop_stage -ge 10 ]; then
   log "Stage 10: Combine features for CV"
-  if [ ! -f data/fbank/common_voice_16_1_en_wav2vec2-conformer_cuts_train.jsonl.gz ]; then
-    pieces=$(find data/fbank/commonvoice_train_split_${num_splits} -name "common_voice_16_1_en_wav2vec2-conformer_cuts_train.*.jsonl.gz")
-    lhotse combine $pieces data/fbank/common_voice_16_1_en_wav2vec2-conformer_cuts_train.jsonl.gz
+  if [ ! -f data/fbank/common_voice_16_1_en_w2v-bert-2_cuts_train.jsonl.gz ]; then
+    pieces=$(find data/fbank/commonvoice_train_split_${num_splits} -name "common_voice_16_1_en_w2v-bert-2_cuts_train.*.jsonl.gz")
+    lhotse combine $pieces data/fbank/common_voice_16_1_en_w2v-bert-2_cuts_train.jsonl.gz
   fi
 fi
 

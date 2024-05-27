@@ -801,37 +801,18 @@ def main():
     asr_data_module = AsrDataModule(args)
     multidataset = MultiDataset(params.manifest_dir)
 
-    test_cuts_libri = multidataset.test_cuts_libri()
-    # test_cuts_timit = multidataset.test_cuts_timit()
-    test_cuts_austalk = multidataset.test_cuts_austalk()
-    test_cuts_sccw = multidataset.test_cuts_sccw()
-    test_cuts_l2a = multidataset.test_cuts_l2a()
-    test_cuts_speechocean = multidataset.test_cuts_speechocean()
+    test_cuts_librivox = multidataset.test_cuts_librivox()
+    test_cuts_fleurs = multidataset.test_cuts_fleurs()
+    test_cuts_commonvoice = multidataset.test_cuts_commonvoice()
+    test_cuts_bookbot = multidataset.test_cuts_bookbot()
 
-    test_dl_libri = asr_data_module.test_dataloaders(test_cuts_libri)
-    # test_dl_timit = asr_data_module.test_dataloaders(test_cuts_timit)
-    test_dl_austalk = asr_data_module.test_dataloaders(test_cuts_austalk)
-    test_dl_sccw = asr_data_module.test_dataloaders(test_cuts_sccw)
-    test_dl_l2a = asr_data_module.test_dataloaders(test_cuts_l2a)
-    test_dl_speechocean = asr_data_module.test_dataloaders(test_cuts_speechocean)
+    test_dl_librivox = asr_data_module.test_dataloaders(test_cuts_librivox)
+    test_dl_fleurs = asr_data_module.test_dataloaders(test_cuts_fleurs)
+    test_dl_commonvoice = asr_data_module.test_dataloaders(test_cuts_commonvoice)
+    test_dl_bookbot = asr_data_module.test_dataloaders(test_cuts_bookbot)
     
-    test_sets = [
-        "test-libriphone",
-        # "test-timit",
-        "test-austalk",
-        "test-sccw",
-        "test-l2a",
-        "test-speechocean",
-    ]
-
-    test_dl = [
-        test_dl_libri,
-        # test_dl_timit,
-        test_dl_austalk,
-        test_dl_sccw,
-        test_dl_l2a,
-        test_dl_speechocean,
-    ]
+    test_sets = ["test-librivox", "test-fleurs", "test-commonvoice", "test-bookbot"]
+    test_dl = [test_dl_librivox, test_dl_fleurs, test_dl_commonvoice, test_dl_bookbot]
 
     for test_set, test_dl in zip(test_sets, test_dl):
         results_dict = decode_dataset(

@@ -39,9 +39,9 @@ class MultiDataset:
             - common-voice-13_0-id_cuts_test.jsonl.gz
             - magichub-indocsc_cuts_train.jsonl.gz
             - magichub-sindodusc_cuts_train.jsonl.gz
-            - bookbot_id_v3_cuts_train.jsonl.gz
-            - bookbot_id_v3_cuts_validation.jsonl.gz
-            - bookbot_id_v3_cuts_test.jsonl.gz
+            - bookbot_id_v4_cuts_train.jsonl.gz
+            - bookbot_id_v4_cuts_validation.jsonl.gz
+            - bookbot_id_v4_cuts_test.jsonl.gz
             - id-eleven_cuts_train.jsonl.gz
         """
         self.manifest_dir = Path(manifest_dir)
@@ -82,7 +82,7 @@ class MultiDataset:
         # Bookbot
         logging.info("Loading Bookbot in lazy mode")
         bookbot_cuts = load_manifest_lazy(
-            self.manifest_dir / "bookbot_id_v3_cuts_train.jsonl.gz"
+            self.manifest_dir / "bookbot_id_v4_cuts_train.jsonl.gz"
         )
 
         # Eleven
@@ -91,15 +91,27 @@ class MultiDataset:
             self.manifest_dir / "id-eleven_cuts_train.jsonl.gz"
         )
 
+        logging.info("Loading Althaf Matcha in lazy mode")
+        althaf_matcha_cuts = load_manifest_lazy(
+            self.manifest_dir / "id-ID-AlthafNeural-Matcha_cuts_train.jsonl.gz"
+        )
+
+        logging.info("Loading Althaf Eleven in lazy mode")
+        althaf_eleven_cuts = load_manifest_lazy(
+            self.manifest_dir / "id-ID-AlthafNeural-Eleven_cuts_train.jsonl.gz"
+        )
+
         return CutSet.mux(
-            fleurs_cuts,
+            bookbot_cuts,
             librivox_cuts,
             commonvoice_cuts,
+            fleurs_cuts,
             indocsc_cuts,
             sindodusc_cuts,
-            bookbot_cuts,
             eleven_cuts,
-            weights=[0.02, 0.04, 0.04, 0.02, 0.02, 0.84, 0.02],
+            althaf_matcha_cuts,
+            althaf_eleven_cuts,
+            weights=[0.83, 0.04, 0.04, 0.02, 0.02, 0.02, 0.02, 0.005, 0.005],
         )
 
     @lru_cache()
@@ -121,7 +133,7 @@ class MultiDataset:
         # Bookbot
         logging.info("Loading Bookbot in lazy mode")
         bookbot_cuts = load_manifest_lazy(
-            self.manifest_dir / "bookbot_id_v3_cuts_validation.jsonl.gz"
+            self.manifest_dir / "bookbot_id_v4_cuts_validation.jsonl.gz"
         )
 
         return CutSet.mux(fleurs_cuts, commonvoice_cuts, bookbot_cuts)
@@ -165,7 +177,7 @@ class MultiDataset:
 
         logging.info("Loading Bookbot in lazy mode")
         bookbot_cuts = load_manifest_lazy(
-            self.manifest_dir / "bookbot_id_v3_cuts_test.jsonl.gz"
+            self.manifest_dir / "bookbot_id_v4_cuts_test.jsonl.gz"
         )
 
         return bookbot_cuts

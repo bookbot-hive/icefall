@@ -931,14 +931,14 @@ def main():
     multidataset = MultiDataset(params.manifest_dir)
 
     test_cuts_libri = multidataset.test_cuts_libri()
-    test_cuts_timit = multidataset.test_cuts_timit()
+    # test_cuts_timit = multidataset.test_cuts_timit()
     test_cuts_austalk = multidataset.test_cuts_austalk()
     test_cuts_sccw = multidataset.test_cuts_sccw()
     test_cuts_l2a = multidataset.test_cuts_l2a()
     test_cuts_speechocean = multidataset.test_cuts_speechocean()
 
     test_dl_libri = asr_data_module.test_dataloaders(test_cuts_libri)
-    test_dl_timit = asr_data_module.test_dataloaders(test_cuts_timit)
+    # test_dl_timit = asr_data_module.test_dataloaders(test_cuts_timit)
     test_dl_austalk = asr_data_module.test_dataloaders(test_cuts_austalk)
     test_dl_sccw = asr_data_module.test_dataloaders(test_cuts_sccw)
     test_dl_l2a = asr_data_module.test_dataloaders(test_cuts_l2a)
@@ -946,7 +946,7 @@ def main():
 
     test_sets = [
         "test-libriphone",
-        "test-timit",
+        # "test-timit",
         "test-austalk",
         "test-sccw",
         "test-l2a",
@@ -955,7 +955,7 @@ def main():
 
     test_dl = [
         test_dl_libri,
-        test_dl_timit,
+        # test_dl_timit,
         test_dl_austalk,
         test_dl_sccw,
         test_dl_l2a,

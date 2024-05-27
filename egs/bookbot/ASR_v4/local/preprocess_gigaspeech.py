@@ -31,7 +31,7 @@ def preprocess_giga_speech():
     dataset_parts = ("train",)
 
     logging.info("Loading manifest (may take 4 minutes)")
-    prefix = "gigaspeech_wav2vec2-conformer"
+    prefix = "gigaspeech_w2v-bert-2"
     suffix = "jsonl.gz"
     manifests = read_manifests_if_cached(
         dataset_parts=dataset_parts,

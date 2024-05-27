@@ -33,7 +33,7 @@ def preprocess_commonvoice():
     dataset_parts = ("train",)
 
     logging.info("Loading manifest")
-    prefix = "common_voice_16_1_en_wav2vec2-conformer"
+    prefix = "common_voice_16_1_en_w2v-bert-2"
     suffix = "jsonl.gz"
     manifests = read_manifests_if_cached(
         dataset_parts=dataset_parts,
