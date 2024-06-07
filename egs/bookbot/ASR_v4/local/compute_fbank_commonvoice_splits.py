@@ -31,6 +31,7 @@ from lhotse import CutSet, KaldifeatFbank, KaldifeatFbankConfig
 # even when we are not invoking the main (e.g. when spawning subprocesses).
 torch.set_num_threads(1)
 torch.set_num_interop_threads(1)
+torch.multiprocessing.set_sharing_strategy("file_system")
 
 
 def get_parser():

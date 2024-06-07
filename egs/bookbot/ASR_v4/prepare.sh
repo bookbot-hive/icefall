@@ -5,7 +5,7 @@ export PROTOCOL_BUFFERS_PYTHON_IMPLEMENTATION=python
 
 set -eou pipefail
 
-nj=10
+nj=8
 stage=-1
 stop_stage=100
 
@@ -13,7 +13,7 @@ stop_stage=100
 # This is to avoid OOM during feature extraction.
 num_splits=1000
 
-dl_dir=$PWD/download
+dl_dir=/scratch/icefall/download
 splits_dir=$PWD/splits_dir
 
 . shared/parse_options.sh || exit 1
@@ -42,16 +42,20 @@ if [ $stage -le 0 ] && [ $stop_stage -ge 0 ]; then
     lhotse download bookbot-huggingface bookbot/libriphone $dl_dir phonemes_ipa " "
   fi
 
-  if [ ! -d $dl_dir/common_voice_16_1_en_w2v-bert-2.0 ]; then
-    lhotse download bookbot-huggingface bookbot/common_voice_16_1_en_w2v-bert-2.0 $dl_dir phonemes_ipa " "
+  if [ ! -d $dl_dir/common_voice_16_1_en_w2v-bert-2.0_filtered ]; then
+    lhotse download bookbot-huggingface bookbot/common_voice_16_1_en_w2v-bert-2.0_filtered $dl_dir phonemes_ipa " "
   fi
 
-  if [ ! -d $dl_dir/gigaspeech_w2v-bert-2.0 ]; then
-    lhotse download bookbot-huggingface bookbot/gigaspeech_w2v-bert-2.0 $dl_dir phonemes_ipa " "
+  if [ ! -d $dl_dir/gigaspeech_w2v-bert-2.0_filtered ]; then
+    lhotse download bookbot-huggingface bookbot/gigaspeech_w2v-bert-2.0_filtered $dl_dir phonemes_ipa " "
   fi
 
   if [ ! -d $dl_dir/bookbot_en_phonemes_w2v-bert-2.0 ]; then
     lhotse download bookbot-huggingface bookbot/bookbot_en_phonemes_w2v-bert-2.0 $dl_dir phonemes_ipa " "
+  fi
+
+  if [ ! -d $dl_dir/en_youtube_w2v-bert-2.0 ]; then
+    lhotse download bookbot-huggingface bookbot/en_youtube_w2v-bert-2.0 $dl_dir phonemes_ipa " "
   fi
 
   if [ ! -d $dl_dir/en-AU-Dean2Zak ]; then
@@ -89,9 +93,10 @@ if [ $stage -le 1 ] && [ $stop_stage -ge 1 ]; then
 
   # lhotse prepare bookbot-huggingface $dl_dir/timit data/manifests
   lhotse prepare bookbot-huggingface $dl_dir/libriphone data/manifests
-  lhotse prepare bookbot-huggingface $dl_dir/common_voice_16_1_en_w2v-bert-2.0 data/manifests
-  lhotse prepare bookbot-huggingface $dl_dir/gigaspeech_w2v-bert-2.0 data/manifests
+  lhotse prepare bookbot-huggingface $dl_dir/common_voice_16_1_en_w2v-bert-2.0_filtered data/manifests
+  lhotse prepare bookbot-huggingface $dl_dir/gigaspeech_w2v-bert-2.0_filtered data/manifests
   lhotse prepare bookbot-huggingface $dl_dir/bookbot_en_phonemes_w2v-bert-2.0 data/manifests
+  lhotse prepare bookbot-huggingface $dl_dir/en_youtube_w2v-bert-2.0 data/manifests
   lhotse prepare bookbot-huggingface $dl_dir/en-AU-Dean2Zak data/manifests
   lhotse prepare bookbot-huggingface $dl_dir/austalk_words_mq data/manifests
   lhotse prepare bookbot-huggingface $dl_dir/sc_cw_children data/manifests
@@ -108,6 +113,7 @@ if [ $stage -le 2 ] && [ $stop_stage -ge 2 ]; then
   # ./local/compute_fbank_timit.py
   ./local/compute_fbank_libriphone.py
   ./local/compute_fbank_bookbot.py
+  ./local/compute_fbank_en_youtube.py
   ./local/compute_fbank_en_au_dean2zak.py
   ./local/compute_fbank_austalk.py
   ./local/compute_fbank_sccw.py
