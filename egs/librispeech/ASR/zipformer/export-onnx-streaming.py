@@ -469,12 +469,12 @@ def export_encoder_model_onnx(
         opset_version=opset_version,
         input_names=input_names,
         output_names=output_names,
-        dynamic_axes={
-            "x": {0: "N"},
-            "encoder_out": {0: "N"},
-            **inputs,
-            **outputs,
-        },
+        # dynamic_axes={
+        #     "x": {0: "N"},
+        #     "encoder_out": {0: "N"},
+        #     **inputs,
+        #     **outputs,
+        # },
     )
 
     add_meta_data(filename=encoder_filename, meta_data=meta_data)
@@ -506,7 +506,7 @@ def export_decoder_model_onnx(
     context_size = decoder_model.decoder.context_size
     vocab_size = decoder_model.decoder.vocab_size
 
-    y = torch.zeros(10, context_size, dtype=torch.int64)
+    y = torch.zeros(1, context_size, dtype=torch.int64)
     decoder_model = torch.jit.script(decoder_model)
     torch.onnx.export(
         decoder_model,
@@ -516,10 +516,10 @@ def export_decoder_model_onnx(
         opset_version=opset_version,
         input_names=["y"],
         output_names=["decoder_out"],
-        dynamic_axes={
-            "y": {0: "N"},
-            "decoder_out": {0: "N"},
-        },
+        # dynamic_axes={
+        #     "y": {0: "N"},
+        #     "decoder_out": {0: "N"},
+        # },
     )
 
     meta_data = {
@@ -547,8 +547,8 @@ def export_joiner_model_onnx(
     joiner_dim = joiner_model.output_linear.weight.shape[1]
     logging.info(f"joiner dim: {joiner_dim}")
 
-    projected_encoder_out = torch.rand(11, joiner_dim, dtype=torch.float32)
-    projected_decoder_out = torch.rand(11, joiner_dim, dtype=torch.float32)
+    projected_encoder_out = torch.rand(1, joiner_dim, dtype=torch.float32)
+    projected_decoder_out = torch.rand(1, joiner_dim, dtype=torch.float32)
 
     torch.onnx.export(
         joiner_model,
@@ -561,11 +561,11 @@ def export_joiner_model_onnx(
             "decoder_out",
         ],
         output_names=["logit"],
-        dynamic_axes={
-            "encoder_out": {0: "N"},
-            "decoder_out": {0: "N"},
-            "logit": {0: "N"},
-        },
+        # dynamic_axes={
+        #     "encoder_out": {0: "N"},
+        #     "decoder_out": {0: "N"},
+        #     "logit": {0: "N"},
+        # },
     )
     meta_data = {
         "joiner_dim": str(joiner_dim),
