@@ -78,7 +78,7 @@ class MultiDataset:
             gigaspeech_cuts,
             dean2zak_cuts,
             youtube_cuts,
-            weights=[0.018, 0.01, 0.308, 0.632, 0.008, 0.024],
+            weights=[0.007, 0.011, 0.319, 0.653, 0.008, 0.002],
         )
 
     @lru_cache()
