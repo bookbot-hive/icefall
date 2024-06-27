@@ -18,7 +18,7 @@
 
 
 """
-This file computes fbank features of the Eleven dataset.
+This file computes fbank features of the Althaf Matcha dataset.
 It looks for manifests in the directory data/manifests.
 
 The generated fbank features are saved in data/fbank.

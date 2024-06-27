@@ -18,7 +18,7 @@
 
 
 """
-This file computes fbank features of the Eleven dataset.
+This file computes fbank features of the AlthafNeural dataset.
 It looks for manifests in the directory data/manifests.
 
 The generated fbank features are saved in data/fbank.
@@ -51,7 +51,7 @@ def compute_fbank_althaf():
     num_mel_bins = 80
 
     dataset_parts = ("train",)
-    prefix = "id-ID-AlthafNeural-Eleven"
+    prefix = "id-ID-AlthafNeural"
     suffix = "jsonl.gz"
     manifests = read_manifests_if_cached(
         dataset_parts=dataset_parts,
