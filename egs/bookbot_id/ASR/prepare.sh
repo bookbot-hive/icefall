@@ -65,6 +65,26 @@ if [ $stage -le 0 ] && [ $stop_stage -ge 0 ]; then
     lhotse download bookbot-huggingface bookbot/id-ID-AlthafNeural $dl_dir phonemes_ipa " "
   fi
 
+  if [ ! -d $dl_dir/id-ID-Althaf-Neural-words ]; then
+    lhotse download bookbot-huggingface bookbot/id-ID-Althaf-Neural-words $dl_dir phonemes_ipa " "
+  fi
+
+  if [ ! -d $dl_dir/id-ZA-Neural-words ]; then
+    lhotse download bookbot-huggingface bookbot/id-ZA-Neural-words $dl_dir phonemes_ipa " "
+  fi
+
+  if [ ! -d $dl_dir/id-IN-1-Neural-words ]; then
+    lhotse download bookbot-huggingface bookbot/id-IN-1-Neural-words $dl_dir phonemes_ipa " "
+  fi
+
+  if [ ! -d $dl_dir/id-IN-2-Neural-words ]; then
+    lhotse download bookbot-huggingface bookbot/id-IN-2-Neural-words $dl_dir phonemes_ipa " "
+  fi
+
+  if [ ! -d $dl_dir/id-US-Neural-words ]; then
+    lhotse download bookbot-huggingface bookbot/id-US-Neural-words $dl_dir phonemes_ipa " "
+  fi
+
   if [ ! -d $dl_dir/musan ]; then
     lhotse download musan $dl_dir
   fi
@@ -87,6 +107,11 @@ if [ $stage -le 1 ] && [ $stop_stage -ge 1 ]; then
   lhotse prepare bookbot-huggingface $dl_dir/magichub-sindodusc data/manifests
   lhotse prepare bookbot-huggingface $dl_dir/id-ID-AlthafNeural-Matcha data/manifests
   lhotse prepare bookbot-huggingface $dl_dir/id-ID-AlthafNeural data/manifests
+  lhotse prepare bookbot-huggingface $dl_dir/id-ID-Althaf-Neural-words data/manifests
+  lhotse prepare bookbot-huggingface $dl_dir/id-ZA-Neural-words data/manifests
+  lhotse prepare bookbot-huggingface $dl_dir/id-IN-1-Neural-words data/manifests
+  lhotse prepare bookbot-huggingface $dl_dir/id-IN-2-Neural-words data/manifests
+  lhotse prepare bookbot-huggingface $dl_dir/id-US-Neural-words data/manifests
   lhotse prepare musan $dl_dir/musan data/manifests
   lhotse prepare hallway $dl_dir/audio_splits data/manifests
 fi
@@ -104,6 +129,11 @@ if [ $stage -le 2 ] && [ $stop_stage -ge 2 ]; then
   ./local/compute_fbank_id_us.py
   ./local/compute_fbank_althaf.py
   ./local/compute_fbank_althaf_matcha.py
+  ./local/compute_fbank_althaf_neural_words.py
+  ./local/compute_fbank_id_za_words.py
+  ./local/compute_fbank_id_in_1_words.py
+  ./local/compute_fbank_id_in_2_words.py
+  ./local/compute_fbank_id_us_words.py
   ./local/compute_fbank_musan.py
   ./local/compute_fbank_hallway.py
 fi
