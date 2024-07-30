@@ -51,55 +51,52 @@ class MultiDataset:
 
         # LibriVox
         logging.info("Loading LibriVox in lazy mode")
-        librivox_cuts = load_manifest_lazy(
-            self.manifest_dir / "librivox-indonesia_cuts_train.jsonl.gz"
-        )
+        librivox_cuts = load_manifest_lazy(self.manifest_dir / "librivox-indonesia_cuts_train.jsonl.gz")
 
         # FLEURS
         logging.info("Loading FLEURS in lazy mode")
-        fleurs_cuts = load_manifest_lazy(
-            self.manifest_dir / "fleurs-id_cuts_train.jsonl.gz"
-        )
+        fleurs_cuts = load_manifest_lazy(self.manifest_dir / "fleurs-id_cuts_train.jsonl.gz")
 
         # Common Voice
         logging.info("Loading Common Voice in lazy mode")
-        commonvoice_cuts = load_manifest_lazy(
-            self.manifest_dir / "common-voice-13_0-id_cuts_train.jsonl.gz"
-        )
+        commonvoice_cuts = load_manifest_lazy(self.manifest_dir / "common-voice-13_0-id_cuts_train.jsonl.gz")
 
         # IndoCSC
         logging.info("Loading IndoCSC in lazy mode")
-        indocsc_cuts = load_manifest_lazy(
-            self.manifest_dir / "magichub-indocsc_cuts_train.jsonl.gz"
-        )
+        indocsc_cuts = load_manifest_lazy(self.manifest_dir / "magichub-indocsc_cuts_train.jsonl.gz")
 
         # SIndoDUSC
         logging.info("Loading SIndoDUSC in lazy mode")
-        sindodusc_cuts = load_manifest_lazy(
-            self.manifest_dir / "magichub-sindodusc_cuts_train.jsonl.gz"
-        )
+        sindodusc_cuts = load_manifest_lazy(self.manifest_dir / "magichub-sindodusc_cuts_train.jsonl.gz")
 
         # Bookbot
         logging.info("Loading Bookbot in lazy mode")
-        bookbot_cuts = load_manifest_lazy(
-            self.manifest_dir / "bookbot_id_v4_cuts_train.jsonl.gz"
-        )
+        bookbot_cuts = load_manifest_lazy(self.manifest_dir / "bookbot_id_v4_cuts_train.jsonl.gz")
 
         # id-US
         logging.info("Loading id-US in lazy mode")
-        id_us_cuts = load_manifest_lazy(
-            self.manifest_dir / "id-US-MultiNeural_cuts_train.jsonl.gz"
-        )
+        id_us_cuts = load_manifest_lazy(self.manifest_dir / "id-US-MultiNeural_cuts_train.jsonl.gz")
 
         logging.info("Loading Althaf Matcha in lazy mode")
-        althaf_matcha_cuts = load_manifest_lazy(
-            self.manifest_dir / "id-ID-AlthafNeural-Matcha_cuts_train.jsonl.gz"
-        )
+        althaf_matcha_cuts = load_manifest_lazy(self.manifest_dir / "id-ID-AlthafNeural-Matcha_cuts_train.jsonl.gz")
 
         logging.info("Loading Althaf in lazy mode")
-        althaf_cuts = load_manifest_lazy(
-            self.manifest_dir / "id-ID-AlthafNeural_cuts_train.jsonl.gz"
-        )
+        althaf_cuts = load_manifest_lazy(self.manifest_dir / "id-ID-AlthafNeural_cuts_train.jsonl.gz")
+
+        logging.info("Loading Althaf words in lazy mode")
+        althaf_words_cuts = load_manifest_lazy(self.manifest_dir / "id-ID-Althaf-Neural-words_cuts_train.jsonl.gz")
+
+        logging.info("Loading id-IN words in lazy mode")
+        id_in_1_words_cuts = load_manifest_lazy(self.manifest_dir / "id-IN-1-Neural-words_cuts_train.jsonl.gz")
+
+        logging.info("Loading id-IN words in lazy mode")
+        id_in_2_words_cuts = load_manifest_lazy(self.manifest_dir / "id-IN-2-Neural-words_cuts_train.jsonl.gz")
+
+        logging.info("Loading id-US words in lazy mode")
+        id_us_words_cuts = load_manifest_lazy(self.manifest_dir / "id-US-Neural-words_cuts_train.jsonl.gz")
+
+        logging.info("Loading id-ZA words in lazy mode")
+        id_za_words_cuts = load_manifest_lazy(self.manifest_dir / "id-ZA-Neural-words_cuts_train.jsonl.gz")
 
         return CutSet.mux(
             bookbot_cuts,
@@ -111,7 +108,12 @@ class MultiDataset:
             id_us_cuts,
             althaf_matcha_cuts,
             althaf_cuts,
-            weights=[0.83, 0.04, 0.04, 0.02, 0.02, 0.02, 0.02, 0.005, 0.005],
+            althaf_words_cuts,
+            id_in_1_words_cuts,
+            id_in_2_words_cuts,
+            id_us_words_cuts,
+            id_za_words_cuts,
+            weights=[0.683, 0.033, 0.033, 0.017, 0.017, 0.017, 0.017, 0.004, 0.004, 0.035, 0.035, 0.035, 0.035, 0.035],
         )
 
     @lru_cache()
@@ -120,21 +122,15 @@ class MultiDataset:
 
         # FLEURS
         logging.info("Loading FLEURS in lazy mode")
-        fleurs_cuts = load_manifest_lazy(
-            self.manifest_dir / "fleurs-id_cuts_validation.jsonl.gz"
-        )
+        fleurs_cuts = load_manifest_lazy(self.manifest_dir / "fleurs-id_cuts_validation.jsonl.gz")
 
         # Common Voice
         logging.info("Loading Common Voice in lazy mode")
-        commonvoice_cuts = load_manifest_lazy(
-            self.manifest_dir / "common-voice-13_0-id_cuts_validation.jsonl.gz"
-        )
+        commonvoice_cuts = load_manifest_lazy(self.manifest_dir / "common-voice-13_0-id_cuts_validation.jsonl.gz")
 
         # Bookbot
         logging.info("Loading Bookbot in lazy mode")
-        bookbot_cuts = load_manifest_lazy(
-            self.manifest_dir / "bookbot_id_v4_cuts_validation.jsonl.gz"
-        )
+        bookbot_cuts = load_manifest_lazy(self.manifest_dir / "bookbot_id_v4_cuts_validation.jsonl.gz")
 
         return CutSet.mux(fleurs_cuts, commonvoice_cuts, bookbot_cuts)
 
@@ -143,9 +139,7 @@ class MultiDataset:
         logging.info("About to get LibriVox test cuts")
 
         logging.info("Loading LibriVox in lazy mode")
-        librivox_cuts = load_manifest_lazy(
-            self.manifest_dir / "librivox-indonesia_cuts_test.jsonl.gz"
-        )
+        librivox_cuts = load_manifest_lazy(self.manifest_dir / "librivox-indonesia_cuts_test.jsonl.gz")
 
         return librivox_cuts
 
@@ -154,9 +148,7 @@ class MultiDataset:
         logging.info("About to get FLEURS test cuts")
 
         logging.info("Loading FLEURS in lazy mode")
-        fleurs_cuts = load_manifest_lazy(
-            self.manifest_dir / "fleurs-id_cuts_test.jsonl.gz"
-        )
+        fleurs_cuts = load_manifest_lazy(self.manifest_dir / "fleurs-id_cuts_test.jsonl.gz")
 
         return fleurs_cuts
 
@@ -165,9 +157,7 @@ class MultiDataset:
         logging.info("About to get Common Voice test cuts")
 
         logging.info("Loading Common Voice in lazy mode")
-        commonvoice_cuts = load_manifest_lazy(
-            self.manifest_dir / "common-voice-13_0-id_cuts_test.jsonl.gz"
-        )
+        commonvoice_cuts = load_manifest_lazy(self.manifest_dir / "common-voice-13_0-id_cuts_test.jsonl.gz")
 
         return commonvoice_cuts
 
@@ -176,8 +166,6 @@ class MultiDataset:
         logging.info("About to get Bookbot test cuts")
 
         logging.info("Loading Bookbot in lazy mode")
-        bookbot_cuts = load_manifest_lazy(
-            self.manifest_dir / "bookbot_id_v4_cuts_test.jsonl.gz"
-        )
+        bookbot_cuts = load_manifest_lazy(self.manifest_dir / "bookbot_id_v4_cuts_test.jsonl.gz")
 
         return bookbot_cuts
