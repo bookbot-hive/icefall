@@ -1,0 +1,1 @@
+/home/s44504/icefall/egs/librispeech/ASR/pruned_transducer_stateless2/beam_search.py

@@ -48,7 +48,8 @@ popd
   --joiner-dim 512 \
   --causal True \
   --chunk-size 16 \
-  --left-context-frames 128
+  --left-context-frames 128 \
+  --fp16 True
 
 The --chunk-size in training is "16,32,64,-1", so we select one of them
 (excluding -1) during streaming export. The same applies to `--left-context`,
@@ -88,9 +89,7 @@ from icefall.utils import num_tokens, str2bool
 
 
 def get_parser():
-    parser = argparse.ArgumentParser(
-        formatter_class=argparse.ArgumentDefaultsHelpFormatter
-    )
+    parser = argparse.ArgumentParser(formatter_class=argparse.ArgumentDefaultsHelpFormatter)
 
     parser.add_argument(
         "--epoch",
@@ -154,6 +153,13 @@ def get_parser():
         help="The context size in the decoder. 1 means bigram; 2 means tri-gram",
     )
 
+    parser.add_argument(
+        "--fp16",
+        type=str2bool,
+        default=False,
+        help="Whether to export models in fp16",
+    )
+
     add_model_arguments(parser)
 
     return parser
@@ -180,9 +186,7 @@ def add_meta_data(filename: str, meta_data: Dict[str, str]):
 class OnnxEncoder(nn.Module):
     """A wrapper for Zipformer and the encoder_proj from the joiner"""
 
-    def __init__(
-        self, encoder: Zipformer2, encoder_embed: nn.Module, encoder_proj: nn.Linear
-    ):
+    def __init__(self, encoder: Zipformer2, encoder_embed: nn.Module, encoder_proj: nn.Linear):
         """
         Args:
           encoder:
@@ -219,9 +223,7 @@ class OnnxEncoder(nn.Module):
         src_key_padding_mask = torch.zeros(N, self.chunk_size, dtype=torch.bool)
 
         # processed_mask is used to mask out initial states
-        processed_mask = torch.arange(left_context_len, device=x.device).expand(
-            x.size(0), left_context_len
-        )
+        processed_mask = torch.arange(left_context_len, device=x.device).expand(x.size(0), left_context_len)
         processed_lens = states[-1]  # (batch,)
         # (batch, left_context_size)
         processed_mask = (processed_lens.unsqueeze(1) <= processed_mask).flip(1)
@@ -335,9 +337,7 @@ def export_encoder_model_onnx(
     opset_version: int = 11,
     feature_dim: int = 80,
 ) -> None:
-    encoder_model.encoder.__class__.forward = (
-        encoder_model.encoder.__class__.streaming_forward
-    )
+    encoder_model.encoder.__class__.forward = encoder_model.encoder.__class__.streaming_forward
 
     decode_chunk_len = encoder_model.chunk_size * 2
     # The encoder_embed subsample features (T - 7) // 2
@@ -469,12 +469,12 @@ def export_encoder_model_onnx(
         opset_version=opset_version,
         input_names=input_names,
         output_names=output_names,
-        # dynamic_axes={
-        #     "x": {0: "N"},
-        #     "encoder_out": {0: "N"},
-        #     **inputs,
-        #     **outputs,
-        # },
+        dynamic_axes={
+            "x": {0: "N"},
+            "encoder_out": {0: "N"},
+            **inputs,
+            **outputs,
+        },
     )
 
     add_meta_data(filename=encoder_filename, meta_data=meta_data)
@@ -506,7 +506,7 @@ def export_decoder_model_onnx(
     context_size = decoder_model.decoder.context_size
     vocab_size = decoder_model.decoder.vocab_size
 
-    y = torch.zeros(1, context_size, dtype=torch.int64)
+    y = torch.zeros(10, context_size, dtype=torch.int64)
     decoder_model = torch.jit.script(decoder_model)
     torch.onnx.export(
         decoder_model,
@@ -516,10 +516,10 @@ def export_decoder_model_onnx(
         opset_version=opset_version,
         input_names=["y"],
         output_names=["decoder_out"],
-        # dynamic_axes={
-        #     "y": {0: "N"},
-        #     "decoder_out": {0: "N"},
-        # },
+        dynamic_axes={
+            "y": {0: "N"},
+            "decoder_out": {0: "N"},
+        },
     )
 
     meta_data = {
@@ -547,8 +547,8 @@ def export_joiner_model_onnx(
     joiner_dim = joiner_model.output_linear.weight.shape[1]
     logging.info(f"joiner dim: {joiner_dim}")
 
-    projected_encoder_out = torch.rand(1, joiner_dim, dtype=torch.float32)
-    projected_decoder_out = torch.rand(1, joiner_dim, dtype=torch.float32)
+    projected_encoder_out = torch.rand(11, joiner_dim, dtype=torch.float32)
+    projected_decoder_out = torch.rand(11, joiner_dim, dtype=torch.float32)
 
     torch.onnx.export(
         joiner_model,
@@ -561,11 +561,11 @@ def export_joiner_model_onnx(
             "decoder_out",
         ],
         output_names=["logit"],
-        # dynamic_axes={
-        #     "encoder_out": {0: "N"},
-        #     "decoder_out": {0: "N"},
-        #     "logit": {0: "N"},
-        # },
+        dynamic_axes={
+            "encoder_out": {0: "N"},
+            "decoder_out": {0: "N"},
+            "logit": {0: "N"},
+        },
     )
     meta_data = {
         "joiner_dim": str(joiner_dim),
@@ -600,24 +600,16 @@ def main():
 
     if not params.use_averaged_model:
         if params.iter > 0:
-            filenames = find_checkpoints(params.exp_dir, iteration=-params.iter)[
-                : params.avg
-            ]
+            filenames = find_checkpoints(params.exp_dir, iteration=-params.iter)[: params.avg]
             if len(filenames) == 0:
-                raise ValueError(
-                    f"No checkpoints found for"
-                    f" --iter {params.iter}, --avg {params.avg}"
-                )
+                raise ValueError(f"No checkpoints found for" f" --iter {params.iter}, --avg {params.avg}")
             elif len(filenames) < params.avg:
                 raise ValueError(
-                    f"Not enough checkpoints ({len(filenames)}) found for"
-                    f" --iter {params.iter}, --avg {params.avg}"
+                    f"Not enough checkpoints ({len(filenames)}) found for" f" --iter {params.iter}, --avg {params.avg}"
                 )
             logging.info(f"averaging {filenames}")
             model.to(device)
-            model.load_state_dict(
-                average_checkpoints(filenames, device=device), strict=False
-            )
+            model.load_state_dict(average_checkpoints(filenames, device=device), strict=False)
         elif params.avg == 1:
             load_checkpoint(f"{params.exp_dir}/epoch-{params.epoch}.pt", model)
         else:
@@ -628,23 +620,15 @@ def main():
                     filenames.append(f"{params.exp_dir}/epoch-{i}.pt")
             logging.info(f"averaging {filenames}")
             model.to(device)
-            model.load_state_dict(
-                average_checkpoints(filenames, device=device), strict=False
-            )
+            model.load_state_dict(average_checkpoints(filenames, device=device), strict=False)
     else:
         if params.iter > 0:
-            filenames = find_checkpoints(params.exp_dir, iteration=-params.iter)[
-                : params.avg + 1
-            ]
+            filenames = find_checkpoints(params.exp_dir, iteration=-params.iter)[: params.avg + 1]
             if len(filenames) == 0:
-                raise ValueError(
-                    f"No checkpoints found for"
-                    f" --iter {params.iter}, --avg {params.avg}"
-                )
+                raise ValueError(f"No checkpoints found for" f" --iter {params.iter}, --avg {params.avg}")
             elif len(filenames) < params.avg + 1:
                 raise ValueError(
-                    f"Not enough checkpoints ({len(filenames)}) found for"
-                    f" --iter {params.iter}, --avg {params.avg}"
+                    f"Not enough checkpoints ({len(filenames)}) found for" f" --iter {params.iter}, --avg {params.avg}"
                 )
             filename_start = filenames[-1]
             filename_end = filenames[0]
@@ -668,8 +652,7 @@ def main():
             filename_start = f"{params.exp_dir}/epoch-{start}.pt"
             filename_end = f"{params.exp_dir}/epoch-{params.epoch}.pt"
             logging.info(
-                f"Calculating the averaged model over epoch range from "
-                f"{start} (excluded) to {params.epoch}"
+                f"Calculating the averaged model over epoch range from " f"{start} (excluded) to {params.epoch}"
             )
             model.to(device)
             model.load_state_dict(
@@ -746,6 +729,26 @@ def main():
         opset_version=opset_version,
     )
     logging.info(f"Exported joiner to {joiner_filename}")
+
+    if params.fp16:
+        from onnxconverter_common import float16
+
+        logging.info("Generate fp16 models")
+
+        encoder = onnx.load(encoder_filename)
+        encoder_fp16 = float16.convert_float_to_float16(encoder, keep_io_types=True)
+        encoder_filename_fp16 = params.exp_dir / f"encoder-{suffix}.fp16.onnx"
+        onnx.save(encoder_fp16, encoder_filename_fp16)
+
+        decoder = onnx.load(decoder_filename)
+        decoder_fp16 = float16.convert_float_to_float16(decoder, keep_io_types=True)
+        decoder_filename_fp16 = params.exp_dir / f"decoder-{suffix}.fp16.onnx"
+        onnx.save(decoder_fp16, decoder_filename_fp16)
+
+        joiner = onnx.load(joiner_filename)
+        joiner_fp16 = float16.convert_float_to_float16(joiner, keep_io_types=True)
+        joiner_filename_fp16 = params.exp_dir / f"joiner-{suffix}.fp16.onnx"
+        onnx.save(joiner_fp16, joiner_filename_fp16)
 
     # Generate int8 quantization models
     # See https://onnxruntime.ai/docs/performance/model-optimizations/quantization.html#data-type-selection

@@ -1,0 +1,1 @@
+/home/s44504/icefall/egs/librispeech/ASR/zipformer/onnx_pretrained-streaming-ctc.py
