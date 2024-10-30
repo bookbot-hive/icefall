@@ -41,6 +41,14 @@ if [ $stage -le 0 ] && [ $stop_stage -ge 0 ]; then
     lhotse download bookbot-huggingface bookbot/ALFFA_swahili $dl_dir phonemes_ipa " "
   fi
 
+  if [ ! -d $dl_dir/bookbot_sw_v1 ]; then
+    lhotse download bookbot-huggingface bookbot/bookbot_sw_v1 $dl_dir phonemes " "
+  fi
+
+  if [ ! -d $dl_dir/bookbot_sw_noisy_v1 ]; then
+    lhotse download bookbot-huggingface bookbot/bookbot_sw_noisy_v1 $dl_dir phonemes " "
+  fi
+
   if [ ! -d $dl_dir/musan ]; then
     lhotse download musan $dl_dir
   fi
@@ -57,6 +65,8 @@ if [ $stage -le 1 ] && [ $stop_stage -ge 1 ]; then
   lhotse prepare bookbot-huggingface $dl_dir/common_voice_16_1_sw data/manifests
   lhotse prepare bookbot-huggingface $dl_dir/fleurs_sw data/manifests
   lhotse prepare bookbot-huggingface $dl_dir/ALFFA_swahili data/manifests
+  lhotse prepare bookbot-huggingface $dl_dir/bookbot_sw_v1 data/manifests
+  lhotse prepare bookbot-huggingface $dl_dir/bookbot_sw_noisy_v1 data/manifests
   lhotse prepare musan $dl_dir/musan data/manifests
   lhotse prepare hallway $dl_dir/audio_splits data/manifests
 fi
@@ -68,6 +78,8 @@ if [ $stage -le 2 ] && [ $stop_stage -ge 2 ]; then
   ./local/compute_fbank_commonvoice.py
   ./local/compute_fbank_fleurs.py
   ./local/compute_fbank_alffa.py
+  ./local/compute_fbank_bookbot.py
+  ./local/compute_fbank_bookbot_noisy.py
   ./local/compute_fbank_musan.py
   ./local/compute_fbank_hallway.py
 fi

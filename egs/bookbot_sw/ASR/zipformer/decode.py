@@ -141,9 +141,7 @@ LOG_EPS = math.log(1e-10)
 
 
 def get_parser():
-    parser = argparse.ArgumentParser(
-        formatter_class=argparse.ArgumentDefaultsHelpFormatter
-    )
+    parser = argparse.ArgumentParser(formatter_class=argparse.ArgumentDefaultsHelpFormatter)
 
     parser.add_argument(
         "--epoch",
@@ -465,9 +463,7 @@ def decode_one_batch(
             hyps.append(tokens)
     elif params.decoding_method == "fast_beam_search_nbest_oracle":
         texts = supervisions["text"]
-        ref_texts = [
-            [lexicon.token_table[phn] for phn in text.split()] for text in texts
-        ]
+        ref_texts = [[lexicon.token_table[phn] for phn in text.split()] for text in texts]
         hyp_tokens = fast_beam_search_nbest_oracle(
             model=model,
             decoding_graph=decoding_graph,
@@ -546,9 +542,7 @@ def decode_one_batch(
                     beam=params.beam_size,
                 )
             else:
-                raise ValueError(
-                    f"Unsupported decoding method: {params.decoding_method}"
-                )
+                raise ValueError(f"Unsupported decoding method: {params.decoding_method}")
             hyps.append([lexicon.token_table[i] for i in hyp])
 
     if params.decoding_method == "greedy_search":
@@ -668,9 +662,7 @@ def save_results(
         # ref/hyp pairs.
         errs_filename = params.res_dir / f"errs-{test_set_name}-{params.suffix}.txt"
         with open(errs_filename, "w") as f:
-            wer = write_error_stats(
-                f, f"{test_set_name}-{key}", results, enable_log=True
-            )
+            wer = write_error_stats(f, f"{test_set_name}-{key}", results, enable_log=True)
             test_set_wers[key] = wer
 
         logging.info("Wrote detailed error stats to {}".format(errs_filename))
@@ -720,12 +712,8 @@ def main():
         params.suffix = f"epoch-{params.epoch}-avg-{params.avg}"
 
     if params.causal:
-        assert (
-            "," not in params.chunk_size
-        ), "chunk_size should be one value in decoding."
-        assert (
-            "," not in params.left_context_frames
-        ), "left_context_frames should be one value in decoding."
+        assert "," not in params.chunk_size, "chunk_size should be one value in decoding."
+        assert "," not in params.left_context_frames, "left_context_frames should be one value in decoding."
         params.suffix += f"-chunk-{params.chunk_size}"
         params.suffix += f"-left-context-{params.left_context_frames}"
 
@@ -753,9 +741,7 @@ def main():
             params.suffix += f"-transformer-lm-scale-{params.lm_scale}"
 
         if "LODR" in params.decoding_method:
-            params.suffix += (
-                f"-LODR-{params.tokens_ngram}gram-scale-{params.ngram_lm_scale}"
-            )
+            params.suffix += f"-LODR-{params.tokens_ngram}gram-scale-{params.ngram_lm_scale}"
 
     if params.use_averaged_model:
         params.suffix += "-use-averaged-model"
@@ -782,18 +768,12 @@ def main():
 
     if not params.use_averaged_model:
         if params.iter > 0:
-            filenames = find_checkpoints(params.exp_dir, iteration=-params.iter)[
-                : params.avg
-            ]
+            filenames = find_checkpoints(params.exp_dir, iteration=-params.iter)[: params.avg]
             if len(filenames) == 0:
-                raise ValueError(
-                    f"No checkpoints found for"
-                    f" --iter {params.iter}, --avg {params.avg}"
-                )
+                raise ValueError(f"No checkpoints found for" f" --iter {params.iter}, --avg {params.avg}")
             elif len(filenames) < params.avg:
                 raise ValueError(
-                    f"Not enough checkpoints ({len(filenames)}) found for"
-                    f" --iter {params.iter}, --avg {params.avg}"
+                    f"Not enough checkpoints ({len(filenames)}) found for" f" --iter {params.iter}, --avg {params.avg}"
                 )
             logging.info(f"averaging {filenames}")
             model.to(device)
@@ -811,18 +791,12 @@ def main():
             model.load_state_dict(average_checkpoints(filenames, device=device))
     else:
         if params.iter > 0:
-            filenames = find_checkpoints(params.exp_dir, iteration=-params.iter)[
-                : params.avg + 1
-            ]
+            filenames = find_checkpoints(params.exp_dir, iteration=-params.iter)[: params.avg + 1]
             if len(filenames) == 0:
-                raise ValueError(
-                    f"No checkpoints found for"
-                    f" --iter {params.iter}, --avg {params.avg}"
-                )
+                raise ValueError(f"No checkpoints found for" f" --iter {params.iter}, --avg {params.avg}")
             elif len(filenames) < params.avg + 1:
                 raise ValueError(
-                    f"Not enough checkpoints ({len(filenames)}) found for"
-                    f" --iter {params.iter}, --avg {params.avg}"
+                    f"Not enough checkpoints ({len(filenames)}) found for" f" --iter {params.iter}, --avg {params.avg}"
                 )
             filename_start = filenames[-1]
             filename_end = filenames[0]
@@ -845,8 +819,7 @@ def main():
             filename_start = f"{params.exp_dir}/epoch-{start}.pt"
             filename_end = f"{params.exp_dir}/epoch-{params.epoch}.pt"
             logging.info(
-                f"Calculating the averaged model over epoch range from "
-                f"{start} (excluded) to {params.epoch}"
+                f"Calculating the averaged model over epoch range from " f"{start} (excluded) to {params.epoch}"
             )
             model.to(device)
             model.load_state_dict(
@@ -893,9 +866,7 @@ def main():
             word_table = lexicon.word_table
             lg_filename = params.lang_dir / "LG.pt"
             logging.info(f"Loading {lg_filename}")
-            decoding_graph = k2.Fsa.from_dict(
-                torch.load(lg_filename, map_location=device)
-            )
+            decoding_graph = k2.Fsa.from_dict(torch.load(lg_filename, map_location=device))
             decoding_graph.scores *= params.ngram_lm_scale
         else:
             word_table = None
@@ -915,12 +886,14 @@ def main():
 
     test_cuts_fleurs = multidataset.test_cuts_fleurs()
     test_cuts_commonvoice = multidataset.test_cuts_commonvoice()
+    test_cuts_bookbot = multidataset.test_cuts_bookbot()
 
     test_dl_fleurs = asr_data_module.test_dataloaders(test_cuts_fleurs)
     test_dl_commonvoice = asr_data_module.test_dataloaders(test_cuts_commonvoice)
+    test_dl_bookbot = asr_data_module.test_dataloaders(test_cuts_bookbot)
 
-    test_sets = ["test-fleurs", "test-commonvoice"]
-    test_dl = [test_dl_fleurs, test_dl_commonvoice]
+    test_sets = ["test-fleurs", "test-commonvoice", "test-bookbot"]
+    test_dl = [test_dl_fleurs, test_dl_commonvoice, test_dl_bookbot]
 
     for test_set, test_dl in zip(test_sets, test_dl):
         results_dict = decode_dataset(

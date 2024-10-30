@@ -73,9 +73,7 @@ LOG_EPS = math.log(1e-10)
 
 
 def get_parser():
-    parser = argparse.ArgumentParser(
-        formatter_class=argparse.ArgumentDefaultsHelpFormatter
-    )
+    parser = argparse.ArgumentParser(formatter_class=argparse.ArgumentDefaultsHelpFormatter)
 
     parser.add_argument(
         "--epoch",
@@ -246,29 +244,17 @@ def stack_states(state_list: List[List[torch.Tensor]]) -> List[torch.Tensor]:
     for layer in range(tot_num_layers):
         layer_offset = layer * 6
         # cached_key: (left_context_len, batch_size, key_dim)
-        cached_key = torch.cat(
-            [state_list[i][layer_offset] for i in range(batch_size)], dim=1
-        )
+        cached_key = torch.cat([state_list[i][layer_offset] for i in range(batch_size)], dim=1)
         # cached_nonlin_attn: (num_heads, batch_size, left_context_len, head_dim)
-        cached_nonlin_attn = torch.cat(
-            [state_list[i][layer_offset + 1] for i in range(batch_size)], dim=1
-        )
+        cached_nonlin_attn = torch.cat([state_list[i][layer_offset + 1] for i in range(batch_size)], dim=1)
         # cached_val1: (left_context_len, batch_size, value_dim)
-        cached_val1 = torch.cat(
-            [state_list[i][layer_offset + 2] for i in range(batch_size)], dim=1
-        )
+        cached_val1 = torch.cat([state_list[i][layer_offset + 2] for i in range(batch_size)], dim=1)
         # cached_val2: (left_context_len, batch_size, value_dim)
-        cached_val2 = torch.cat(
-            [state_list[i][layer_offset + 3] for i in range(batch_size)], dim=1
-        )
+        cached_val2 = torch.cat([state_list[i][layer_offset + 3] for i in range(batch_size)], dim=1)
         # cached_conv1: (#batch, channels, left_pad)
-        cached_conv1 = torch.cat(
-            [state_list[i][layer_offset + 4] for i in range(batch_size)], dim=0
-        )
+        cached_conv1 = torch.cat([state_list[i][layer_offset + 4] for i in range(batch_size)], dim=0)
         # cached_conv2: (#batch, channels, left_pad)
-        cached_conv2 = torch.cat(
-            [state_list[i][layer_offset + 5] for i in range(batch_size)], dim=0
-        )
+        cached_conv2 = torch.cat([state_list[i][layer_offset + 5] for i in range(batch_size)], dim=0)
         batch_states += [
             cached_key,
             cached_nonlin_attn,
@@ -278,9 +264,7 @@ def stack_states(state_list: List[List[torch.Tensor]]) -> List[torch.Tensor]:
             cached_conv2,
         ]
 
-    cached_embed_left_pad = torch.cat(
-        [state_list[i][-2] for i in range(batch_size)], dim=0
-    )
+    cached_embed_left_pad = torch.cat([state_list[i][-2] for i in range(batch_size)], dim=0)
     batch_states.append(cached_embed_left_pad)
 
     processed_lens = torch.cat([state_list[i][-1] for i in range(batch_size)], dim=0)
@@ -323,25 +307,15 @@ def unstack_states(batch_states: List[Tensor]) -> List[List[Tensor]]:
         # cached_key: (left_context_len, batch_size, key_dim)
         cached_key_list = batch_states[layer_offset].chunk(chunks=batch_size, dim=1)
         # cached_nonlin_attn: (num_heads, batch_size, left_context_len, head_dim)
-        cached_nonlin_attn_list = batch_states[layer_offset + 1].chunk(
-            chunks=batch_size, dim=1
-        )
+        cached_nonlin_attn_list = batch_states[layer_offset + 1].chunk(chunks=batch_size, dim=1)
         # cached_val1: (left_context_len, batch_size, value_dim)
-        cached_val1_list = batch_states[layer_offset + 2].chunk(
-            chunks=batch_size, dim=1
-        )
+        cached_val1_list = batch_states[layer_offset + 2].chunk(chunks=batch_size, dim=1)
         # cached_val2: (left_context_len, batch_size, value_dim)
-        cached_val2_list = batch_states[layer_offset + 3].chunk(
-            chunks=batch_size, dim=1
-        )
+        cached_val2_list = batch_states[layer_offset + 3].chunk(chunks=batch_size, dim=1)
         # cached_conv1: (#batch, channels, left_pad)
-        cached_conv1_list = batch_states[layer_offset + 4].chunk(
-            chunks=batch_size, dim=0
-        )
+        cached_conv1_list = batch_states[layer_offset + 4].chunk(chunks=batch_size, dim=0)
         # cached_conv2: (#batch, channels, left_pad)
-        cached_conv2_list = batch_states[layer_offset + 5].chunk(
-            chunks=batch_size, dim=0
-        )
+        cached_conv2_list = batch_states[layer_offset + 5].chunk(chunks=batch_size, dim=0)
         for i in range(batch_size):
             state_list[i] += [
                 cached_key_list[i],
@@ -389,9 +363,7 @@ def streaming_forward(
     src_key_padding_mask = make_pad_mask(x_lens)
 
     # processed_mask is used to mask out initial states
-    processed_mask = torch.arange(left_context_len, device=x.device).expand(
-        x.size(0), left_context_len
-    )
+    processed_mask = torch.arange(left_context_len, device=x.device).expand(x.size(0), left_context_len)
     processed_lens = states[-1]  # (batch,)
     # (batch, left_context_size)
     processed_mask = (processed_lens.unsqueeze(1) <= processed_mask).flip(1)
@@ -595,18 +567,13 @@ def decode_dataset(
         decode_streams.append(decode_stream)
 
         while len(decode_streams) >= params.num_decode_streams:
-            finished_streams = decode_one_chunk(
-                params=params, model=model, decode_streams=decode_streams
-            )
+            finished_streams = decode_one_chunk(params=params, model=model, decode_streams=decode_streams)
             for i in sorted(finished_streams, reverse=True):
                 decode_results.append(
                     (
                         decode_streams[i].id,
                         decode_streams[i].ground_truth.split(),
-                        [
-                            lexicon.token_table[t]
-                            for t in decode_streams[i].decoding_result()
-                        ],
+                        [lexicon.token_table[t] for t in decode_streams[i].decoding_result()],
                     )
                 )
                 del decode_streams[i]
@@ -616,18 +583,13 @@ def decode_dataset(
 
     # decode final chunks of last sequences
     while len(decode_streams):
-        finished_streams = decode_one_chunk(
-            params=params, model=model, decode_streams=decode_streams
-        )
+        finished_streams = decode_one_chunk(params=params, model=model, decode_streams=decode_streams)
         for i in sorted(finished_streams, reverse=True):
             decode_results.append(
                 (
                     decode_streams[i].id,
                     decode_streams[i].ground_truth.split(),
-                    [
-                        lexicon.token_table[t]
-                        for t in decode_streams[i].decoding_result()
-                    ],
+                    [lexicon.token_table[t] for t in decode_streams[i].decoding_result()],
                 )
             )
             del decode_streams[i]
@@ -635,11 +597,7 @@ def decode_dataset(
     if params.decoding_method == "greedy_search":
         key = "greedy_search"
     elif params.decoding_method == "fast_beam_search":
-        key = (
-            f"beam_{params.beam}_"
-            f"max_contexts_{params.max_contexts}_"
-            f"max_states_{params.max_states}"
-        )
+        key = f"beam_{params.beam}_" f"max_contexts_{params.max_contexts}_" f"max_states_{params.max_states}"
     elif params.decoding_method == "modified_beam_search":
         key = f"num_active_paths_{params.num_active_paths}"
     else:
@@ -663,9 +621,7 @@ def save_results(
         # ref/hyp pairs.
         errs_filename = params.res_dir / f"errs-{test_set_name}-{params.suffix}.txt"
         with open(errs_filename, "w") as f:
-            wer = write_error_stats(
-                f, f"{test_set_name}-{key}", results, enable_log=True
-            )
+            wer = write_error_stats(f, f"{test_set_name}-{key}", results, enable_log=True)
             test_set_wers[key] = wer
 
         logging.info("Wrote detailed error stats to {}".format(errs_filename))
@@ -704,9 +660,7 @@ def main():
 
     assert params.causal, params.causal
     assert "," not in params.chunk_size, "chunk_size should be one value in decoding."
-    assert (
-        "," not in params.left_context_frames
-    ), "left_context_frames should be one value in decoding."
+    assert "," not in params.left_context_frames, "left_context_frames should be one value in decoding."
     params.suffix += f"-chunk-{params.chunk_size}"
     params.suffix += f"-left-context-{params.left_context_frames}"
 
@@ -741,18 +695,12 @@ def main():
 
     if not params.use_averaged_model:
         if params.iter > 0:
-            filenames = find_checkpoints(params.exp_dir, iteration=-params.iter)[
-                : params.avg
-            ]
+            filenames = find_checkpoints(params.exp_dir, iteration=-params.iter)[: params.avg]
             if len(filenames) == 0:
-                raise ValueError(
-                    f"No checkpoints found for"
-                    f" --iter {params.iter}, --avg {params.avg}"
-                )
+                raise ValueError(f"No checkpoints found for" f" --iter {params.iter}, --avg {params.avg}")
             elif len(filenames) < params.avg:
                 raise ValueError(
-                    f"Not enough checkpoints ({len(filenames)}) found for"
-                    f" --iter {params.iter}, --avg {params.avg}"
+                    f"Not enough checkpoints ({len(filenames)}) found for" f" --iter {params.iter}, --avg {params.avg}"
                 )
             logging.info(f"averaging {filenames}")
             model.to(device)
@@ -770,18 +718,12 @@ def main():
             model.load_state_dict(average_checkpoints(filenames, device=device))
     else:
         if params.iter > 0:
-            filenames = find_checkpoints(params.exp_dir, iteration=-params.iter)[
-                : params.avg + 1
-            ]
+            filenames = find_checkpoints(params.exp_dir, iteration=-params.iter)[: params.avg + 1]
             if len(filenames) == 0:
-                raise ValueError(
-                    f"No checkpoints found for"
-                    f" --iter {params.iter}, --avg {params.avg}"
-                )
+                raise ValueError(f"No checkpoints found for" f" --iter {params.iter}, --avg {params.avg}")
             elif len(filenames) < params.avg + 1:
                 raise ValueError(
-                    f"Not enough checkpoints ({len(filenames)}) found for"
-                    f" --iter {params.iter}, --avg {params.avg}"
+                    f"Not enough checkpoints ({len(filenames)}) found for" f" --iter {params.iter}, --avg {params.avg}"
                 )
             filename_start = filenames[-1]
             filename_end = filenames[0]
@@ -804,8 +746,7 @@ def main():
             filename_start = f"{params.exp_dir}/epoch-{start}.pt"
             filename_end = f"{params.exp_dir}/epoch-{params.epoch}.pt"
             logging.info(
-                f"Calculating the averaged model over epoch range from "
-                f"{start} (excluded) to {params.epoch}"
+                f"Calculating the averaged model over epoch range from " f"{start} (excluded) to {params.epoch}"
             )
             model.to(device)
             model.load_state_dict(
@@ -831,9 +772,10 @@ def main():
 
     test_cuts_fleurs = multidataset.test_cuts_fleurs()
     test_cuts_commonvoice = multidataset.test_cuts_commonvoice()
+    test_cuts_bookbot = multidataset.test_cuts_bookbot()
 
-    test_sets = ["test-fleurs", "test-commonvoice"]
-    test_cuts = [test_cuts_fleurs, test_cuts_commonvoice]
+    test_sets = ["test-fleurs", "test-commonvoice", "test-bookbot"]
+    test_cuts = [test_cuts_fleurs, test_cuts_commonvoice, test_cuts_bookbot]
 
     for test_set, test_cut in zip(test_sets, test_cuts):
         results_dict = decode_dataset(

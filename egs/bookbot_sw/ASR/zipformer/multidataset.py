@@ -55,11 +55,21 @@ class MultiDataset:
         logging.info("Loading ALFFA in lazy mode")
         alffa_cuts = load_manifest_lazy(self.manifest_dir / "ALFFA_swahili_cuts_train.jsonl.gz")
 
+        # Bookbot
+        logging.info("Loading Bookbot in lazy mode")
+        bookbot_cuts = load_manifest_lazy(self.manifest_dir / "bookbot_sw_v1_cuts_train.jsonl.gz")
+
+        # Bookbot noisy
+        logging.info("Loading Bookbot noisy in lazy mode")
+        bookbot_noisy_cuts = load_manifest_lazy(self.manifest_dir / "bookbot_sw_noisy_v1_cuts_train.jsonl.gz")
+
         return CutSet.mux(
             commonvoice_cuts,
             fleurs_cuts,
             alffa_cuts,
-            weights=[0.7, 0.15, 0.15],
+            bookbot_cuts,
+            bookbot_noisy_cuts,
+            weights=[0.62, 0.13, 0.13, 0.1, 0.02],
         )
 
     @lru_cache()
@@ -74,7 +84,11 @@ class MultiDataset:
         logging.info("Loading Common Voice in lazy mode")
         commonvoice_cuts = load_manifest_lazy(self.manifest_dir / "common_voice_16_1_sw_cuts_validation.jsonl.gz")
 
-        return CutSet.mux(fleurs_cuts, commonvoice_cuts)
+        # Bookbot
+        logging.info("Loading Bookbot in lazy mode")
+        bookbot_cuts = load_manifest_lazy(self.manifest_dir / "bookbot_sw_v1_cuts_validation.jsonl.gz")
+
+        return CutSet.mux(fleurs_cuts, commonvoice_cuts, bookbot_cuts)
 
     @lru_cache()
     def test_cuts_fleurs(self) -> CutSet:
@@ -93,3 +107,12 @@ class MultiDataset:
         commonvoice_cuts = load_manifest_lazy(self.manifest_dir / "common_voice_16_1_sw_cuts_test.jsonl.gz")
 
         return commonvoice_cuts
+
+    @lru_cache()
+    def test_cuts_bookbot(self) -> CutSet:
+        logging.info("About to get Bookbot test cuts")
+
+        logging.info("Loading Bookbot in lazy mode")
+        bookbot_cuts = load_manifest_lazy(self.manifest_dir / "bookbot_sw_v1_cuts_test.jsonl.gz")
+
+        return bookbot_cuts

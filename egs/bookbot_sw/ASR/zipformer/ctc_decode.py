@@ -778,12 +778,14 @@ def main():
 
     test_cuts_fleurs = multidataset.test_cuts_fleurs()
     test_cuts_commonvoice = multidataset.test_cuts_commonvoice()
+    test_cuts_bookbot = multidataset.test_cuts_bookbot()
 
     test_dl_fleurs = asr_data_module.test_dataloaders(test_cuts_fleurs)
     test_dl_commonvoice = asr_data_module.test_dataloaders(test_cuts_commonvoice)
+    test_dl_bookbot = asr_data_module.test_dataloaders(test_cuts_bookbot)
 
-    test_sets = ["test-fleurs", "test-commonvoice"]
-    test_dl = [test_dl_fleurs, test_dl_commonvoice]
+    test_sets = ["test-fleurs", "test-commonvoice", "test-bookbot"]
+    test_dl = [test_dl_fleurs, test_dl_commonvoice, test_dl_bookbot]
 
     for test_set, test_dl in zip(test_sets, test_dl):
         results_dict = decode_dataset(
