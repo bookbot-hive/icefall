@@ -41,7 +41,6 @@ from shutil import copyfile
 from typing import Any, Dict, List, Optional, Tuple, Union
 
 import optim
-import sentencepiece as spm
 import torch
 import torch.multiprocessing as mp
 import torch.nn as nn
@@ -632,7 +631,7 @@ def compute_loss(
       model:
         The model for training. It is an instance of Zipformer in our case.
       batch:
-        A batch of data. See `lhotse.dataset.K2SpeechRecognitionDataset()`
+        A batch of data. See `lhotse.dataset.AudioTaggingDataset()`
         for the content in it.
       is_training:
         True for training. False for validation. When it is True, this
@@ -790,12 +789,14 @@ def train_one_epoch(
             rank=0,
         )
 
+    num_samples = 0
     for batch_idx, batch in enumerate(train_dl):
         if batch_idx % 10 == 0:
             set_batch_count(model, get_adjusted_batch_count(params))
 
         params.batch_idx_train += 1
         batch_size = batch["inputs"].size(0)
+        num_samples += batch_size
 
         try:
             with torch.cuda.amp.autocast(enabled=params.use_fp16):
@@ -920,6 +921,12 @@ def train_one_epoch(
                     tb_writer, "train/valid_", params.batch_idx_train
                 )
 
+        if num_samples > params.num_samples:
+            logging.info(
+                f"Number of training samples exceeds {params.num_samples} in this epoch, move on to next epoch"
+            )
+            break
+
     loss_value = tot_loss["loss"] / tot_loss["frames"]
     params.train_loss = loss_value
     if params.train_loss < params.best_train_loss:
@@ -1033,7 +1040,8 @@ def run(rank, world_size, args):
 
         return True
 
-    train_cuts = train_cuts.filter(remove_short_and_long_utt)
+    if not params.weighted_sampler:
+        train_cuts = train_cuts.filter(remove_short_and_long_utt)
 
     if params.start_batch > 0 and checkpoints and "sampler" in checkpoints:
         # We only load the sampler's state dict when it loads a checkpoint
@@ -1108,7 +1116,7 @@ def display_and_save_batch(
 
     Args:
       batch:
-        A batch of data. See `lhotse.dataset.K2SpeechRecognitionDataset()`
+        A batch of data. See `lhotse.dataset.AudioTaggingDataset()`
         for the content in it.
       params:
         Parameters for training. See :func:`get_params`.

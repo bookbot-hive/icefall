@@ -371,7 +371,7 @@ if [ $stage -le 12 ] && [ $stop_stage -ge 12 ]; then
         # 2. chmod +x ./jq
         # 3. cp jq /usr/bin
         gunzip -c ${file} \
-          | jq '.text' | sed 's/"//g' > $lang_dir/transcript_words.txt
+          | jq '.supervisions[].text' | sed 's/"//g' > $lang_dir/transcript_words.txt
 
         # Ensure space only appears once
         sed -i 's/\t/ /g' $lang_dir/transcript_words.txt

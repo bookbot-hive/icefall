@@ -29,8 +29,9 @@ from icefall.utils import str2bool
 class OtcPhoneTrainingGraphCompiler(object):
     def __init__(
         self,
-        lang_dir: Path,
+        lexicon: Lexicon,
         otc_token: str,
+        oov: str = "<UNK>",
         device: Union[str, torch.device] = "cpu",
         initial_bypass_weight: float = 0.0,
         initial_self_loop_weight: float = 0.0,
@@ -39,31 +40,27 @@ class OtcPhoneTrainingGraphCompiler(object):
     ) -> None:
         """
         Args:
-          lang_dir:
-            This directory is expected to contain the following files:
-
-                - bpe.model
-                - words.txt
+          lexicon:
+            It is built from `data/lang/lexicon.txt`.
           otc_token:
             The special token in OTC that represent all non-blank tokens
           device:
             It indicates CPU or CUDA.
-          sos_token:
-            The word piece that represents sos.
-          eos_token:
-            The word piece that represents eos.
         """
-        lexicon = Lexicon(lang_dir)
-        self.token_table = lexicon.token_table
-
-        self.otc_token = otc_token
-        assert self.otc_token in self.token_table
-
         self.device = device
+        L_inv = lexicon.L_inv.to(self.device)
+        assert L_inv.requires_grad is False
+        assert oov in lexicon.word_table
 
-        max_token_id = self.get_max_token_id()
+        self.L_inv = k2.arc_sort(L_inv)
+        self.oov_id = lexicon.word_table[oov]
+        self.otc_id = lexicon.word_table[otc_token]
+        self.word_table = lexicon.word_table
+
+        max_token_id = max(lexicon.tokens)
         ctc_topo = k2.ctc_topo(max_token_id, modified=False)
         self.ctc_topo = ctc_topo.to(self.device)
+        self.max_token_id = max_token_id
 
         self.initial_bypass_weight = initial_bypass_weight
         self.initial_self_loop_weight = initial_self_loop_weight
@@ -71,13 +68,7 @@ class OtcPhoneTrainingGraphCompiler(object):
         self.self_loop_weight_decay = self_loop_weight_decay
 
     def get_max_token_id(self):
-        max_token_id = 0
-        for symbol in self.token_table.symbols:
-            if not symbol.startswith("#"):
-                max_token_id = max(self.token_table[symbol], max_token_id)
-        assert max_token_id > 0
-
-        return max_token_id
+        return self.max_token_id
 
     def make_arc(
         self,
@@ -89,7 +80,7 @@ class OtcPhoneTrainingGraphCompiler(object):
         return f"{from_state} {to_state} {symbol} {weight}"
 
     def texts_to_ids(self, texts: List[str]) -> List[List[int]]:
-        """Convert a list of texts to a list-of-list of piece IDs.
+        """Convert a list of texts to a list-of-list of word IDs.
 
         Args:
           texts:
@@ -98,11 +89,18 @@ class OtcPhoneTrainingGraphCompiler(object):
 
                 ['HELLO ICEFALL', 'HELLO k2']
         Returns:
-          Return a list-of-list of piece IDs.
+          Return a list-of-list of word IDs.
         """
-        return [
-            [self.lexicon.token_table[phn] for phn in text.split()] for text in texts
-        ]
+        word_ids_list = []
+        for text in texts:
+            word_ids = []
+            for word in text.split():
+                if word in self.word_table:
+                    word_ids.append(self.word_table[word])
+                else:
+                    word_ids.append(self.oov_id)
+            word_ids_list.append(word_ids)
+        return word_ids_list
 
     def compile(
         self,
@@ -138,13 +136,11 @@ class OtcPhoneTrainingGraphCompiler(object):
 
         transcript_fsa = self.convert_transcript_to_fsa(
             texts,
-            self.otc_token,
             allow_bypass_arc,
             allow_self_loop_arc,
             bypass_weight,
             self_loop_weight,
         )
-        transcript_fsa = transcript_fsa.to(self.device)
         fsa_with_self_loop = k2.remove_epsilon_and_add_self_loops(transcript_fsa)
         fsa_with_self_loop = k2.arc_sort(fsa_with_self_loop)
 
@@ -160,61 +156,57 @@ class OtcPhoneTrainingGraphCompiler(object):
     def convert_transcript_to_fsa(
         self,
         texts: List[str],
-        otc_token: str,
         allow_bypass_arc: str2bool = True,
         allow_self_loop_arc: str2bool = True,
         bypass_weight: float = 0.0,
         self_loop_weight: float = 0.0,
     ):
-        otc_token_id = self.token_table[otc_token]
 
-        transcript_fsa_list = []
+        word_fsa_list = []
         for text in texts:
-            text_piece_ids = []
+            word_ids = []
 
-            for phn in text:
-                text_piece_ids.append([phn])
+            for word in text.split():
+                if word in self.word_table:
+                    word_ids.append(self.word_table[word])
+                else:
+                    word_ids.append(self.oov_id)
 
             arcs = []
             start_state = 0
             cur_state = start_state
             next_state = 1
 
-            for piece_ids in text_piece_ids:
-                bypass_cur_state = cur_state
-
+            for word_id in word_ids:
                 if allow_self_loop_arc:
                     self_loop_arc = self.make_arc(
                         cur_state,
                         cur_state,
-                        otc_token_id,
+                        self.otc_id,
                         self_loop_weight,
                     )
                     arcs.append(self_loop_arc)
 
-                for piece_id in piece_ids:
-                    arc = self.make_arc(cur_state, next_state, piece_id, 0.0)
-                    arcs.append(arc)
+                arc = self.make_arc(cur_state, next_state, word_id, 0.0)
+                arcs.append(arc)
 
-                    cur_state = next_state
-                    next_state += 1
-
-                bypass_next_state = cur_state
                 if allow_bypass_arc:
                     bypass_arc = self.make_arc(
-                        bypass_cur_state,
-                        bypass_next_state,
-                        otc_token_id,
+                        cur_state,
+                        next_state,
+                        self.otc_id,
                         bypass_weight,
                     )
                     arcs.append(bypass_arc)
-                bypass_cur_state = cur_state
+
+                cur_state = next_state
+                next_state += 1
 
             if allow_self_loop_arc:
                 self_loop_arc = self.make_arc(
                     cur_state,
                     cur_state,
-                    otc_token_id,
+                    self.otc_id,
                     self_loop_weight,
                 )
                 arcs.append(self_loop_arc)
@@ -226,10 +218,15 @@ class OtcPhoneTrainingGraphCompiler(object):
             arcs.append(f"{final_state}")
             sorted_arcs = sorted(arcs, key=lambda a: int(a.split()[0]))
 
-            transcript_fsa = k2.Fsa.from_str("\n".join(sorted_arcs))
-            transcript_fsa = k2.arc_sort(transcript_fsa)
-            transcript_fsa_list.append(transcript_fsa)
+            word_fsa = k2.Fsa.from_str("\n".join(sorted_arcs))
+            word_fsa = k2.arc_sort(word_fsa)
+            word_fsa_list.append(word_fsa)
 
-        transcript_fsa_vec = k2.create_fsa_vec(transcript_fsa_list)
+        word_fsa_vec = k2.create_fsa_vec(word_fsa_list).to(self.device)
+        word_fsa_vec_with_self_loop = k2.add_epsilon_self_loops(word_fsa_vec)
 
-        return transcript_fsa_vec
+        fsa = k2.intersect(
+            self.L_inv, word_fsa_vec_with_self_loop, treat_epsilons_specially=False
+        )
+        ans_fsa = fsa.invert_()
+        return k2.arc_sort(ans_fsa)
