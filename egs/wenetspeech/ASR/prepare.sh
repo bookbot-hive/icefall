@@ -161,7 +161,7 @@ fi
 if [ $stage -le 11 ] && [ $stop_stage -ge 11 ]; then
   log "Stage 11: Combine features for S"
   if [ ! -f data/fbank/cuts_S.jsonl.gz ]; then
-    pieces=$(find data/fbank/S_split_1000 -name "cuts_S.*.jsonl.gz")
+    pieces=$(find data/fbank/S_split_${num_splits} -name "cuts_S.*.jsonl.gz")
     lhotse combine $pieces data/fbank/cuts_S.jsonl.gz
   fi
 fi
@@ -169,7 +169,7 @@ fi
 if [ $stage -le 12 ] && [ $stop_stage -ge 12 ]; then
   log "Stage 12: Combine features for M"
   if [ ! -f data/fbank/cuts_M.jsonl.gz ]; then
-    pieces=$(find data/fbank/M_split_1000 -name "cuts_M.*.jsonl.gz")
+    pieces=$(find data/fbank/M_split_${num_splits} -name "cuts_M.*.jsonl.gz")
     lhotse combine $pieces data/fbank/cuts_M.jsonl.gz
   fi
 fi
@@ -177,7 +177,7 @@ fi
 if [ $stage -le 13 ] && [ $stop_stage -ge 13 ]; then
   log "Stage 13: Combine features for L"
   if [ ! -f data/fbank/cuts_L.jsonl.gz ]; then
-    pieces=$(find data/fbank/L_split_1000 -name "cuts_L.*.jsonl.gz")
+    pieces=$(find data/fbank/L_split_${num_splits} -name "cuts_L.*.jsonl.gz")
     lhotse combine $pieces data/fbank/cuts_L.jsonl.gz
   fi
 fi
@@ -415,4 +415,13 @@ if [ $stage -le 22 ] && [ $stop_stage -ge 22 ]; then
     fi
     python ./local/compile_lg.py --lang-dir $lang_dir
   done
+fi
+
+if [ $stage -le 23 ] && [ $stop_stage -ge 23 ]; then
+  log "Stage 23: Modify transcript according to fixed results"
+  # See https://github.com/wenet-e2e/WenetSpeech/discussions/54
+  wget -nc https://huggingface.co/datasets/yuekai/wenetspeech_paraformer_fixed_transcript/resolve/main/text.fix -O data/fbank/text.fix
+  python local/fix_manifest.py \
+    --fixed-transcript-path data/fbank/text.fix \
+    --training-subset L
 fi
