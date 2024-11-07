@@ -775,11 +775,11 @@ def main():
     test_cuts_bookbot = multidataset.test_cuts_bookbot()
 
     test_sets = [
-        # "test-gigaspeech",
+        "test-gigaspeech",
         "test-bookbot",
     ]
     test_cuts = [
-        # test_cuts_gigaspeech,
+        test_cuts_gigaspeech,
         test_cuts_bookbot,
     ]
 

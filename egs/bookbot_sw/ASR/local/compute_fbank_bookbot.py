@@ -55,7 +55,7 @@ def compute_fbank_bookbot():
         "validation",
         "test",
     )
-    prefix = "bookbot_sw_v1"
+    prefix = "bookbot_sw_v2-filtered"
     suffix = "jsonl.gz"
     manifests = read_manifests_if_cached(
         dataset_parts=dataset_parts,

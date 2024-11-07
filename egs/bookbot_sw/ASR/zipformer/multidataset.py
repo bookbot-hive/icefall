@@ -57,7 +57,7 @@ class MultiDataset:
 
         # Bookbot
         logging.info("Loading Bookbot in lazy mode")
-        bookbot_cuts = load_manifest_lazy(self.manifest_dir / "bookbot_sw_v1_cuts_train.jsonl.gz")
+        bookbot_cuts = load_manifest_lazy(self.manifest_dir / "bookbot_sw_v2-filtered_cuts_train.jsonl.gz")
 
         # Bookbot noisy
         logging.info("Loading Bookbot noisy in lazy mode")
@@ -69,7 +69,7 @@ class MultiDataset:
             alffa_cuts,
             bookbot_cuts,
             bookbot_noisy_cuts,
-            weights=[0.62, 0.13, 0.13, 0.1, 0.02],
+            weights=[0.54, 0.11, 0.11, 0.23, 0.01],
         )
 
     @lru_cache()
@@ -86,7 +86,7 @@ class MultiDataset:
 
         # Bookbot
         logging.info("Loading Bookbot in lazy mode")
-        bookbot_cuts = load_manifest_lazy(self.manifest_dir / "bookbot_sw_v1_cuts_validation.jsonl.gz")
+        bookbot_cuts = load_manifest_lazy(self.manifest_dir / "bookbot_sw_v2-filtered_cuts_validation.jsonl.gz")
 
         return CutSet.mux(fleurs_cuts, commonvoice_cuts, bookbot_cuts)
 
@@ -113,6 +113,6 @@ class MultiDataset:
         logging.info("About to get Bookbot test cuts")
 
         logging.info("Loading Bookbot in lazy mode")
-        bookbot_cuts = load_manifest_lazy(self.manifest_dir / "bookbot_sw_v1_cuts_test.jsonl.gz")
+        bookbot_cuts = load_manifest_lazy(self.manifest_dir / "bookbot_sw_v2-filtered_cuts_test.jsonl.gz")
 
         return bookbot_cuts

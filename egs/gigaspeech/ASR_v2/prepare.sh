@@ -39,9 +39,11 @@ log "dl_dir: $dl_dir"
 if [ $stage -le 0 ] && [ $stop_stage -ge 0 ]; then
   log "Stage 0: Download data"
 
-  # if [ ! -d $dl_dir/GigaSpeech ]; then
-    # lhotse download bookbot-huggingface bookbot/timit $dl_dir phonemes_ipa " "
-  # fi
+  if [ ! -d $dl_dir/GigaSpeech ]; then
+    ./local/download_gigaspeech.py --config xl --output_dir $dl_dir
+    ./local/download_gigaspeech.py --config test --output_dir $dl_dir
+    ./local/download_gigaspeech.py --config dev --output_dir $dl_dir
+  fi
 
   if [ ! -d $dl_dir/musan ]; then
     lhotse download musan $dl_dir
