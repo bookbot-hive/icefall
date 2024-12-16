@@ -34,7 +34,7 @@ class MultiDataset:
             - libriphone_cuts_test.jsonl.gz
             - common_voice_16_1_en_w2v-bert-2_cuts_train.jsonl.gz
             - gigaspeech_w2v-bert-2_cuts_train.jsonl.gz
-            - bookbot_en_phonemes_w2v-bert-2_cuts_train.jsonl.gz
+            - bookbot_en_v3_parakeet-ctc-1_cuts_train.jsonl.gz
             - en_youtube_w2v-bert-2_cuts_train.jsonl.gz
             - en-AU-Dean2Zak_cuts_train.jsonl.gz
             - austalk_words_mq_cuts_test.jsonl.gz
@@ -61,7 +61,7 @@ class MultiDataset:
 
         # Bookbot
         logging.info("Loading Bookbot in lazy mode")
-        bookbot_cuts = load_manifest_lazy(self.manifest_dir / "bookbot_en_phonemes_w2v-bert-2_cuts_train.jsonl.gz")
+        bookbot_cuts = load_manifest_lazy(self.manifest_dir / "bookbot_en_v3_parakeet-ctc-1_cuts_train.jsonl.gz")
         
         # Youtube
         logging.info("Loading Youtube in lazy mode")

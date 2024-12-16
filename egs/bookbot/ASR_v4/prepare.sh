@@ -50,8 +50,8 @@ if [ $stage -le 0 ] && [ $stop_stage -ge 0 ]; then
     lhotse download bookbot-huggingface bookbot/gigaspeech_w2v-bert-2.0_filtered $dl_dir phonemes_ipa " "
   fi
 
-  if [ ! -d $dl_dir/bookbot_en_phonemes_w2v-bert-2.0_filtered ]; then
-    lhotse download bookbot-huggingface bookbot/bookbot_en_phonemes_w2v-bert-2.0_filtered $dl_dir phonemes_ipa " "
+  if [ ! -d $dl_dir/bookbot_en_v3_parakeet-ctc-1.1b_filtered_phoneme ]; then
+    lhotse download bookbot-huggingface bookbot/bookbot_en_v3_parakeet-ctc-1.1b_filtered_phoneme $dl_dir phonemes_ipa " "
   fi
 
   if [ ! -d $dl_dir/en_youtube_w2v-bert-2.0_filtered ]; then
@@ -95,7 +95,7 @@ if [ $stage -le 1 ] && [ $stop_stage -ge 1 ]; then
   lhotse prepare bookbot-huggingface $dl_dir/libriphone data/manifests
   lhotse prepare bookbot-huggingface $dl_dir/common_voice_16_1_en_w2v-bert-2.0_filtered data/manifests
   lhotse prepare bookbot-huggingface $dl_dir/gigaspeech_w2v-bert-2.0_filtered data/manifests
-  lhotse prepare bookbot-huggingface $dl_dir/bookbot_en_phonemes_w2v-bert-2.0_filtered data/manifests
+  lhotse prepare bookbot-huggingface $dl_dir/bookbot_en_v3_parakeet-ctc-1.1b_filtered_phoneme data/manifests
   lhotse prepare bookbot-huggingface $dl_dir/en_youtube_w2v-bert-2.0_filtered data/manifests
   lhotse prepare bookbot-huggingface $dl_dir/en-AU-Dean2Zak data/manifests
   lhotse prepare bookbot-huggingface $dl_dir/austalk_words_mq data/manifests
