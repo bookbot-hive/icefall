@@ -49,11 +49,7 @@ class MultiDataset:
         logging.info("Loading Bookbot in lazy mode")
         bookbot_cuts = load_manifest_lazy(self.manifest_dir / "bookbot_en_v1-v2_cuts_train.jsonl.gz")
 
-        return CutSet.mux(
-            gigaspeech_cuts,
-            bookbot_cuts,
-            weights=[0.91786, 0.08214],
-        )
+        return CutSet.mux(gigaspeech_cuts, bookbot_cuts)
 
     @lru_cache()
     def valid_cuts(self) -> CutSet:

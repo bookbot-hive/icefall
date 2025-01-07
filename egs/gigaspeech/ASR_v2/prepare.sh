@@ -10,8 +10,8 @@ stage=-1
 stop_stage=100
 
 vocab_sizes=(
-  1000
-  # 500
+  # 1000
+  500
 )
 
 # Split L subset to this number of pieces

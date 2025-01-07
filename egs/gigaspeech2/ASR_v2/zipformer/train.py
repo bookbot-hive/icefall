@@ -62,7 +62,6 @@ from typing import Any, Dict, Optional, Tuple, Union
 
 import k2
 import optim
-import sentencepiece as spm
 import torch
 import torch.multiprocessing as mp
 import torch.nn as nn
@@ -94,6 +93,7 @@ from icefall.checkpoint import (
 )
 from icefall.dist import cleanup_dist, setup_dist
 from icefall.env import get_env_info
+from icefall.lexicon import Lexicon
 from icefall.err import raise_grad_scale_is_too_small_error
 from icefall.hooks import register_inf_check_hooks
 from icefall.utils import (
@@ -312,7 +312,6 @@ def add_model_arguments(parser: argparse.ArgumentParser):
         help="If True, use consistency-regularized CTC.",
     )
 
-
 def get_parser():
     parser = argparse.ArgumentParser(
         formatter_class=argparse.ArgumentDefaultsHelpFormatter
@@ -376,10 +375,10 @@ def get_parser():
     )
 
     parser.add_argument(
-        "--bpe-model",
+        "--lang-dir",
         type=str,
-        default="data/lang_bpe_500/bpe.model",
-        help="Path to the BPE model",
+        default="data/lang_phone",
+        help="The lang dir contains lexicon",
     )
 
     parser.add_argument(
@@ -593,6 +592,10 @@ def get_params() -> AttributeDict:
 
         - subsampling_factor:  The subsampling factor for the model.
 
+        - encoder_dim: Hidden dim for multi-head attention model.
+
+        - num_decoder_layers: Number of decoder layer of transformer decoder.
+
         - warm_step: The warmup period that dictates the decay of the
               scale on "simple" (un-pruned) loss.
     """
@@ -682,7 +685,6 @@ def get_joiner_model(params: AttributeDict) -> nn.Module:
         vocab_size=params.vocab_size,
     )
     return joiner
-
 
 def get_attention_decoder_model(params: AttributeDict) -> nn.Module:
     decoder = AttentionDecoderModel(
@@ -876,7 +878,7 @@ def save_checkpoint(
 def compute_loss(
     params: AttributeDict,
     model: Union[nn.Module, DDP],
-    sp: spm.SentencePieceProcessor,
+    lexicon: Lexicon,
     batch: dict,
     is_training: bool,
     spec_augment: Optional[SpecAugment] = None,
@@ -912,8 +914,8 @@ def compute_loss(
     warm_step = params.warm_step
 
     texts = batch["supervisions"]["text"]
-    y = sp.encode(texts, out_type=int)
-    y = k2.RaggedTensor(y)
+    ids = [[lexicon.token_table[phn] for phn in text.split()] for text in texts]
+    y = k2.RaggedTensor(ids).to(device)
 
     use_cr_ctc = params.use_cr_ctc
     use_spec_aug = use_cr_ctc and is_training
@@ -996,7 +998,7 @@ def compute_loss(
 def compute_validation_loss(
     params: AttributeDict,
     model: Union[nn.Module, DDP],
-    sp: spm.SentencePieceProcessor,
+    lexicon: Lexicon,
     valid_dl: torch.utils.data.DataLoader,
     world_size: int = 1,
 ) -> MetricsTracker:
@@ -1009,7 +1011,7 @@ def compute_validation_loss(
         loss, loss_info = compute_loss(
             params=params,
             model=model,
-            sp=sp,
+            lexicon=lexicon,
             batch=batch,
             is_training=False,
         )
@@ -1032,7 +1034,7 @@ def train_one_epoch(
     model: Union[nn.Module, DDP],
     optimizer: torch.optim.Optimizer,
     scheduler: LRSchedulerType,
-    sp: spm.SentencePieceProcessor,
+    lexicon: Lexicon,
     train_dl: torch.utils.data.DataLoader,
     valid_dl: torch.utils.data.DataLoader,
     scaler: GradScaler,
@@ -1106,7 +1108,7 @@ def train_one_epoch(
                 loss, loss_info = compute_loss(
                     params=params,
                     model=model,
-                    sp=sp,
+                    lexicon=lexicon,
                     batch=batch,
                     is_training=True,
                     spec_augment=spec_augment,
@@ -1212,7 +1214,7 @@ def train_one_epoch(
             valid_info = compute_validation_loss(
                 params=params,
                 model=model,
-                sp=sp,
+                lexicon=lexicon,
                 valid_dl=valid_dl,
                 world_size=world_size,
             )
@@ -1265,13 +1267,10 @@ def run(rank, world_size, args):
         device = torch.device("cuda", rank)
     logging.info(f"Device: {device}")
 
-    sp = spm.SentencePieceProcessor()
-    sp.load(params.bpe_model)
+    lexicon = Lexicon(params.lang_dir)
 
-    # <blk> is defined in local/train_bpe_model.py
-    params.blank_id = sp.piece_to_id("<blk>")
-    params.sos_id = params.eos_id = sp.piece_to_id("<sos/eos>")
-    params.vocab_size = sp.get_piece_size()
+    params.blank_id = lexicon.token_table["<eps>"]
+    params.vocab_size = max(lexicon.tokens) + 1
 
     if not params.use_transducer:
         if not params.use_attention_decoder:
@@ -1357,6 +1356,11 @@ def run(rank, world_size, args):
     if params.inf_check:
         register_inf_check_hooks(model)
 
+    asr_data_module = AsrDataModule(args)
+
+    multidataset = MultiDataset(params.manifest_dir)
+    train_cuts = multidataset.train_cuts()
+
     def remove_short_and_long_utt(c: Cut):
         # Keep only utterances with duration between 1 second and 20 seconds
         #
@@ -1379,25 +1383,20 @@ def run(rank, world_size, args):
         # In ./zipformer.py, the conv module uses the following expression
         # for subsampling
         T = ((c.num_frames - 7) // 2 + 1) // 2
-        tokens = sp.encode(c.supervisions[0].text, out_type=str)
+        tokens = c.supervisions[0].text.split()
 
-        if T < len(tokens):
-            logging.warning(
-                f"Exclude cut with ID {c.id} from training. "
-                f"Number of frames (before subsampling): {c.num_frames}. "
-                f"Number of frames (after subsampling): {T}. "
-                f"Text: {c.supervisions[0].text}. "
-                f"Tokens: {tokens}. "
-                f"Number of tokens: {len(tokens)}"
-            )
+        if T * 2 // 3 < len(tokens):
+            # logging.warning(
+            #     f"Exclude cut with ID {c.id} from training. "
+            #     f"Number of frames (before subsampling): {c.num_frames}. "
+            #     f"Number of frames (after subsampling): {T}. "
+            #     f"Text: {c.supervisions[0].text}. "
+            #     f"Tokens: {tokens}. "
+            #     f"Number of tokens: {len(tokens)}"
+            # )
             return False
 
         return True
-
-    asr_data_module = AsrDataModule(args)
-
-    multidataset = MultiDataset(params.manifest_dir)
-    train_cuts = multidataset.train_cuts()
 
     train_cuts = train_cuts.filter(remove_short_and_long_utt)
 
@@ -1419,12 +1418,12 @@ def run(rank, world_size, args):
             model=model,
             train_dl=train_dl,
             optimizer=optimizer,
-            sp=sp,
+            lexicon=lexicon,
             params=params,
             spec_augment=spec_augment,
         )
 
-    scaler = GradScaler(enabled=params.use_autocast, init_scale=1.0)
+    scaler = GradScaler("cuda", enabled=params.use_fp16, init_scale=1.0)
     if checkpoints and "grad_scaler" in checkpoints:
         logging.info("Loading grad scaler state dict")
         scaler.load_state_dict(checkpoints["grad_scaler"])
@@ -1445,7 +1444,7 @@ def run(rank, world_size, args):
             model_avg=model_avg,
             optimizer=optimizer,
             scheduler=scheduler,
-            sp=sp,
+            lexicon=lexicon,
             train_dl=train_dl,
             valid_dl=valid_dl,
             scaler=scaler,
@@ -1480,7 +1479,7 @@ def run(rank, world_size, args):
 def display_and_save_batch(
     batch: dict,
     params: AttributeDict,
-    sp: spm.SentencePieceProcessor,
+    lexicon: Lexicon,
 ) -> None:
     """Display the batch statistics and save the batch into disk.
 
@@ -1504,8 +1503,10 @@ def display_and_save_batch(
 
     logging.info(f"features shape: {features.shape}")
 
-    y = sp.encode(supervisions["text"], out_type=int)
-    num_tokens = sum(len(i) for i in y)
+    texts = supervisions["text"]
+    ids = [[lexicon.token_table[phn] for phn in text.split()] for text in texts]
+
+    num_tokens = sum(len(i) for i in ids)
     logging.info(f"num tokens: {num_tokens}")
 
 
@@ -1513,7 +1514,7 @@ def scan_pessimistic_batches_for_oom(
     model: Union[nn.Module, DDP],
     train_dl: torch.utils.data.DataLoader,
     optimizer: torch.optim.Optimizer,
-    sp: spm.SentencePieceProcessor,
+    lexicon: Lexicon,
     params: AttributeDict,
     spec_augment: Optional[SpecAugment] = None,
 ):
@@ -1530,7 +1531,7 @@ def scan_pessimistic_batches_for_oom(
                 loss, _ = compute_loss(
                     params=params,
                     model=model,
-                    sp=sp,
+                    lexicon=lexicon,
                     batch=batch,
                     is_training=True,
                     spec_augment=spec_augment,

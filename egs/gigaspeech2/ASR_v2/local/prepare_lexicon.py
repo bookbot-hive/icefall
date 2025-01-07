@@ -1,0 +1,1 @@
+../../../bookbot/ASR_v4/local/prepare_lexicon.py
