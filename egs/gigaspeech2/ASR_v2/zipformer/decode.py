@@ -343,6 +343,17 @@ def get_parser():
                 Used only when the decoding method is
                 modified_beam_search_ngram_rescoring""",
     )
+    parser.add_argument(
+        "--blank-penalty",
+        type=float,
+        default=0.0,
+        help="""
+        The penalty applied on blank symbol during decoding.
+        Note: It is a positive value that would be applied to logits like
+        this `logits[:, 0] -= blank_penalty` (suppose logits.shape is
+        [batch_size, vocab] and blank id is 0).
+        """,
+    )
     add_model_arguments(parser)
 
     return parser
@@ -488,6 +499,7 @@ def decode_one_batch(
             model=model,
             encoder_out=encoder_out,
             encoder_out_lens=encoder_out_lens,
+            blank_penalty=params.blank_penalty,
         )
         for hyp in hyp_tokens:
             tokens = [lexicon.token_table[i] for i in hyp]
@@ -498,6 +510,7 @@ def decode_one_batch(
             encoder_out=encoder_out,
             encoder_out_lens=encoder_out_lens,
             beam=params.beam_size,
+            blank_penalty=params.blank_penalty,
         )
         for hyp in hyp_tokens:
             tokens = [lexicon.token_table[i] for i in hyp]
@@ -538,6 +551,7 @@ def decode_one_batch(
                     model=model,
                     encoder_out=encoder_out_i,
                     max_sym_per_frame=params.max_sym_per_frame,
+                    blank_penalty=params.blank_penalty,
                 )
             elif params.decoding_method == "beam_search":
                 hyp = beam_search(
@@ -552,7 +566,7 @@ def decode_one_batch(
             hyps.append([lexicon.token_table[i] for i in hyp])
 
     if params.decoding_method == "greedy_search":
-        return {"greedy_search": hyps}
+        return {f"greedy_search_blank_penalty_{params.blank_penalty}": hyps}
     elif "fast_beam_search" in params.decoding_method:
         key = f"beam_{params.beam}_"
         key += f"max_contexts_{params.max_contexts}_"
@@ -565,7 +579,7 @@ def decode_one_batch(
 
         return {key: hyps}
     else:
-        return {f"beam_size_{params.beam_size}": hyps}
+        return {f"beam_size_{params.beam_size}_blank_penalty_{params.blank_penalty}": hyps}
 
 
 def decode_dataset(

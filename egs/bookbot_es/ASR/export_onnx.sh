@@ -1,0 +1,13 @@
+./zipformer/export-onnx-streaming.py \
+    --tokens data/lang_phone/tokens.txt \
+    --avg 3 \
+    --causal 1 \
+    --exp-dir tmp/exp-causal-80-epoch \
+    --num-encoder-layers 2,2,2,2,2,2 \
+    --feedforward-dim 512,768,768,768,768,768 \
+    --encoder-dim 192,256,256,256,256,256 \
+    --encoder-unmasked-dim 192,192,192,192,192,192 \
+    --chunk-size 16 \
+    --left-context-frames 128 \
+    --use-transducer True \
+    --epoch 80 \

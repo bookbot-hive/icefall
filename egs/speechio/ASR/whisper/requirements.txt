@@ -1,1 +1,10 @@
-../../../aishell/ASR/whisper/requirements.txt
+k2
+kaldialign
+git+https://github.com/lhotse-speech/lhotse
+sentencepiece
+tensorboard
+librosa
+git+https://github.com/yuekaizhang/whisper.git
+zhconv
+WeTextProcessing
+deepspeed

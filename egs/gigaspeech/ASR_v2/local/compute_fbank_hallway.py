@@ -1,1 +1,0 @@
-/home/s44504/icefall/egs/bookbot_id/ASR/local/compute_fbank_hallway.py

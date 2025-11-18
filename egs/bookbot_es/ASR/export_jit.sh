@@ -1,0 +1,14 @@
+./zipformer/export.py \
+  --exp-dir tmp/exp-causal-80-epoch \
+  --causal 1 \
+  --chunk-size 16 \
+  --left-context-frames 128 \
+  --tokens data/lang_phone/tokens.txt \
+  --epoch 80 \
+  --avg 5 \
+  --jit 1 \
+  --use-transducer True \
+  --num-encoder-layers 2,2,2,2,2,2 \
+  --feedforward-dim 512,768,768,768,768,768 \
+  --encoder-dim 192,256,256,256,256,256 \
+  --encoder-unmasked-dim 192,192,192,192,192,192 \

@@ -1,1 +1,0 @@
-/home/s44504/icefall/egs/bookbot/ASR_v4/zipformer/export-onnx-streaming-ctc.py

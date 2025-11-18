@@ -1,1 +1,0 @@
-/home/s44504/icefall/egs/librispeech/ASR/zipformer/jit_pretrained_streaming.py

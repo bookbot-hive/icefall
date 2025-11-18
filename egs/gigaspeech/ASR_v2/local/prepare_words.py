@@ -1,1 +1,0 @@
-/home/s44504/icefall/egs/bookbot/ASR_v6/local/prepare_words.py
