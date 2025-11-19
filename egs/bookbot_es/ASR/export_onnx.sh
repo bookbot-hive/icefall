@@ -1,8 +1,8 @@
 ./zipformer/export-onnx-streaming.py \
     --tokens data/lang_phone/tokens.txt \
-    --avg 3 \
+    --avg 5 \
     --causal 1 \
-    --exp-dir tmp/exp-causal-80-epoch \
+    --exp-dir tmp/zipformer-streaming-robust-es-v0 \
     --num-encoder-layers 2,2,2,2,2,2 \
     --feedforward-dim 512,768,768,768,768,768 \
     --encoder-dim 192,256,256,256,256,256 \
